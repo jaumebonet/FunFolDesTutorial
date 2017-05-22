@@ -22,6 +22,7 @@
   <FILTERS>
   </FILTERS>
   <MOVERS>
+    <LabelPoseFromResidueSelectorMover name="test" property="TEST" residue_selector="templateChain"/>
     <SavePoseMover name="target" reference_name="target_pose" pdb_file="3ixt.pdb.gz" />
     <!-- The StructFragmentMover is smart enough to know if it has to read or create the fragments -->
     <StructFragmentMover name="FragmentPicker" prefix="frags"
@@ -54,6 +55,7 @@
     <Add mover="removeExtraChains" /> <!-- Template has two chains, we only need one -->
     <Add mover="FragmentPicker" />    <!-- Create or Load fragments for the Ab Initio run of Nub Initio -->
     <Add mover="addCST" />            <!-- Constraints are necessary to run FFL properly -->
+    <Add mover="test" />
     <Add mover="FFL" />               <!-- Run folding around static motif -->
     <Add mover="pymolselect" />
     <!-- <Add mover="DesignRelax" />       # Design/Relax process  -->
