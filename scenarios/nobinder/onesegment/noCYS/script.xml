@@ -6,7 +6,7 @@
     </ScoreFunction>
   </SCOREFXNS>
   <RESIDUE_SELECTORS>
-    <xi:include href="../../../../xml_pieces/selectors.xml" />
+    <xi:include href="selectors.xml" />
     <Index name="insertion" resnums="65A-86A" />      <!-- Insertion region on the template -->
     <Chain name="templateChain" chains="A" />         <!-- Template target chain -->
     <Index name="query_motif" resnums="255P-276P" />  <!-- Segment of interest in motif pose -->
@@ -22,7 +22,6 @@
   <FILTERS>
   </FILTERS>
   <MOVERS>
-    <LabelPoseFromResidueSelectorMover name="test" property="TEST" residue_selector="templateChain"/>
     <SavePoseMover name="target" reference_name="target_pose" pdb_file="3ixt.pdb.gz" />
     <!-- The StructFragmentMover is smart enough to know if it has to read or create the fragments -->
     <StructFragmentMover name="FragmentPicker" prefix="frags"
@@ -34,7 +33,7 @@
       <AtomPairConstraintGenerator name="atompairCST" sd="1.0" ca_only="true" use_harmonic="true" unweighted="true" min_seq_sep="6" max_distance="40" residue_selector="templateChain" />
     </AddConstraints>
 
-    <NubInitioMover name="FFL" fragments_id="frags" template_motif_selector="insertion" use_cst="true" clear_motif_cst="true" rmsd_threshold="5" scorefxn="centroid">
+    <NubInitioMover name="FFL" fragments_id="frags" template_motif_selector="insertion" use_cst="true" clear_motif_cst="true" rmsd_threshold="5" centroid_scorefxn="centroid" fullatom_scorefxn="fullatom" >
       <Nub reference_name="target_pose" residue_selector="query_motif" >
         <Segment order="1" n_term_flex="2" c_term_flex="2" editable="3,5,7,9"/>
       </Nub>
@@ -55,7 +54,6 @@
     <Add mover="removeExtraChains" /> <!-- Template has two chains, we only need one -->
     <Add mover="FragmentPicker" />    <!-- Create or Load fragments for the Ab Initio run of Nub Initio -->
     <Add mover="addCST" />            <!-- Constraints are necessary to run FFL properly -->
-    <Add mover="test" />
     <Add mover="FFL" />               <!-- Run folding around static motif -->
     <Add mover="pymolselect" />
     <!-- <Add mover="DesignRelax" />       # Design/Relax process  -->
