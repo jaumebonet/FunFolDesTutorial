@@ -1,0 +1,3 @@
+SEQUENCE: 
+SCORE: total_score dslf_fa13    fa_atr    fa_dun   fa_elec fa_intra_rep       fa_rep       fa_sol hbond_bb_sc hbond_lr_bb    hbond_sc hbond_sr_bb ni_centroid_score ni_fullatom_score           ni_rmsd ni_rmsd_threshold ni_trials     omega   p_aa_pp pro_close      rama       ref yhh_planarity ni_minimized ni_rmsd_type description 
+SCORE:    6747.857     0.000  -443.212   717.823   -23.277        5.853     4802.363      229.034      -0.275       0.000       0.000     -50.094            24.781          6747.857             0.228             5.000     1.000   119.655     3.360  1344.921     5.182    36.522         0.000            1     no_motif min4l8i_0001

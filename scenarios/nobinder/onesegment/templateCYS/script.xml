@@ -6,12 +6,11 @@
     </ScoreFunction>
   </SCOREFXNS>
   <RESIDUE_SELECTORS>
-    <xi:include href="../../../../xml_pieces/selectors.xml" />
+    <xi:include href="selectors.xml" />
     <Index name="insertion" resnums="54A-68A" />      <!-- Insertion region on the template -->
     <Chain name="templateChain" chains="A" />         <!-- Template target chain -->
-    <Not name="all_but_chA">                          <!-- Clean up unnecessary chains in the template pose -->
-        <Chain chains="A" />
-    </Not>
+    <And name="templateProtein" selectors="PROTEIN,templateChain" />
+    <Not name="all_but_chA" selector="templateProtein" /> <!-- Clean up unnecessary chains in the template pose -->
   </RESIDUE_SELECTORS>
   <MOVE_MAP_FACTORIES>
 
@@ -22,17 +21,16 @@
   </FILTERS>
   <MOVERS>
     <SavePoseMover name="target" reference_name="target_pose" restore_pose="false" />
-    <!-- The StructFragmentMover is smart enough to know if it has to read or create the fragments -->
     <StructFragmentMover name="FragmentPicker" prefix="frags"
       vall_file="../../../../database/vall.jul19.2011.gz" output_frag_files="1"
       small_frag_file="frags.200.3mers" large_frag_file="frags.200.9mers" />
 
     <DeleteRegionMover name="removeExtraChains" residue_selector="all_but_chA" />
     <AddConstraints name="addCST" >
-      <AtomPairConstraintGenerator name="atompairCST" sd="1.0" ca_only="true" use_harmonic="true" unweighted="true" min_seq_sep="6" max_distance="40" residue_selector="templateChain" />
+      <AtomPairConstraintGenerator name="atompairCST" sd="2.0" ca_only="true" use_harmonic="true" unweighted="true" min_seq_sep="6" max_distance="40" residue_selector="templateProtein" />
     </AddConstraints>
 
-    <NubInitioMover name="FFL" fragments_id="frags" template_motif_selector="insertion" use_cst="true" clear_motif_cst="true" rmsd_threshold="5" scorefxn="centroid">
+    <NubInitioMover name="FFL" fragments_id="frags" template_motif_selector="insertion" use_cst="true" clear_motif_cst="false" rmsd_include_motif="true" rmsd_threshold="5" centroid_scorefxn="centroid" fullatom_scorefxn="fullatom" >
       <Nub reference_name="target_pose" residue_selector="insertion" />
     </NubInitioMover>
 
@@ -48,9 +46,9 @@
   <APPLY_TO_POSE>
   </APPLY_TO_POSE>
   <PROTOCOLS>
+    <Add mover="target" />            <!-- Save a copy to the DataMap -->
     <Add mover="removeExtraChains" /> <!-- Template has two chains, we only need one -->
     <Add mover="FragmentPicker" />    <!-- Create or Load fragments for the Ab Initio run of Nub Initio -->
-    <Add mover="target" />            <!-- Save a copy to the DataMap -->
     <Add mover="addCST" />            <!-- Constraints are necessary to run FFL properly -->
     <Add mover="FFL" />               <!-- Run folding around static motif -->
     <Add mover="pymolselect" />

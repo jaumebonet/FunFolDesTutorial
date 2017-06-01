@@ -1,0 +1,62 @@
+<ROSETTASCRIPTS>
+  <SCOREFXNS>
+    <ScoreFunction name="centroid" weights="cen_std" patch="score4L" >
+    </ScoreFunction>
+    <ScoreFunction name="fullatom" weights="talaris2014" >
+    </ScoreFunction>
+  </SCOREFXNS>
+  <RESIDUE_SELECTORS>
+    <xi:include href="selectors.xml" />
+    <Index name="motif1" resnums="54A-59A" />      <!-- Insertion region on the template -->
+    <Index name="motif2" resnums="61A-68A" />      <!-- Insertion region on the template -->
+    <Index name="motif3" resnums="112A-115A" />      <!-- Insertion region on the template -->
+    <Index name="motif4" resnums="123A-126A" />      <!-- Insertion region on the template -->
+    <Or name="insertion" selectors="motif1,motif2,motif3,motif4" />
+    <Chain name="templateChain" chains="A" />         <!-- Template target chain -->
+    <And name="templateProtein" selectors="PROTEIN,templateChain" />
+    <Not name="all_but_chA" selector="templateProtein" /> <!-- Clean up unnecessary chains in the template pose -->
+  </RESIDUE_SELECTORS>
+  <MOVE_MAP_FACTORIES>
+
+  </MOVE_MAP_FACTORIES>
+  <TASKOPERATIONS>
+  </TASKOPERATIONS>
+  <FILTERS>
+  </FILTERS>
+  <MOVERS>
+    <SavePoseMover name="target" reference_name="target_pose" restore_pose="false" />
+    <StructFragmentMover name="FragmentPicker" prefix="frags"
+      vall_file="../../../../database/vall.jul19.2011.gz" output_frag_files="1"
+      small_frag_file="frags.200.3mers" large_frag_file="frags.200.9mers" />
+
+    <DeleteRegionMover name="removeExtraChains" residue_selector="all_but_chA" />
+    <AddConstraints name="addCST" >
+      <AtomPairConstraintGenerator name="atompairCST" sd="2.0" ca_only="true" use_harmonic="true" unweighted="true" min_seq_sep="6" max_distance="40" residue_selector="templateProtein" />
+    </AddConstraints>
+
+    <NubInitioMover name="FFL" fragments_id="frags" template_motif_selector="insertion" use_cst="true" clear_motif_cst="false" rmsd_include_motif="true" rmsd_threshold="5" centroid_scorefxn="centroid" fullatom_scorefxn="fullatom" >
+      <Nub reference_name="target_pose" residue_selector="insertion" />
+    </NubInitioMover>
+
+    <ResidueLabelsToPymolSelectionMover name="pymolselect"/>
+
+    <!-- <PackRotamersMover name="design" scorefxn="fullatom" task_operations="pakerTask" /> -->
+
+    <!-- <FastRelax name="DesignRelax" scorefxn="fullatom" disable_design="false" task_operations="pakerTask" repeats="3" delete_virtual_residues_after_FastRelax="true" >
+      <MoveMap name="movable" />
+    </FastRelax> -->
+
+  </MOVERS>
+  <APPLY_TO_POSE>
+  </APPLY_TO_POSE>
+  <PROTOCOLS>
+    <Add mover="target" />            <!-- Save a copy to the DataMap -->
+    <Add mover="removeExtraChains" /> <!-- Template has two chains, we only need one -->
+    <Add mover="FragmentPicker" />    <!-- Create or Load fragments for the Ab Initio run of Nub Initio -->
+    <Add mover="addCST" />            <!-- Constraints are necessary to run FFL properly -->
+    <Add mover="FFL" />               <!-- Run folding around static motif -->
+    <Add mover="pymolselect" />
+    <!-- <Add mover="DesignRelax" />       # Design/Relax process  -->
+  </PROTOCOLS>
+  <OUTPUT />
+</ROSETTASCRIPTS>
