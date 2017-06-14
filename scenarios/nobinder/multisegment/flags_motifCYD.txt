@@ -1,0 +1,9 @@
+-parser:protocol script_motifCYD.xml
+-s 4zqk.pdb.gz
+
+-in:ignore_unrecognized_res
+-overwrite
+
+-out:prefix motifCYD_
+-out:levels protocols.fold_from_loops:500 protocols.struct_fragment:500
+-out:mute protocols.abinitio

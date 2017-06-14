@@ -2,3 +2,5 @@ score.sc
 *_00??.pdb
 *_pose.pdb
 *.rslog
+
+benchmark/*

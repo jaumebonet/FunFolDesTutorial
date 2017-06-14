@@ -9,7 +9,8 @@
 <And name="COLDSPOT_AND_MOTIF" selectors="COLDSPOT,MOTIF" />
 <And name="HOTSPOT_AND_MOTIF"  selectors="HOTSPOT,MOTIF" />
 
-<Or name="COLDSPOT_OR_TEMPLATE" selectors="COLDSPOT,TEMPLATE" />
-<Or name="FLEXIBLE_OR_TEMPLATE" selectors="FLEXIBLE,TEMPLATE" />
+<Or name="COLDSPOT_OR_TEMPLATE"             selectors="COLDSPOT,TEMPLATE" />
+<Or name="FLEXIBLE_OR_TEMPLATE"             selectors="FLEXIBLE,TEMPLATE" />
+<Or name="COLDSPOT_OR_FLEXIBLE_OR_TEMPLATE" selectors="COLDSPOT,FLEXIBLE,TEMPLATE" />
 
 <ProteinResidueSelector name="PROTEIN" />
