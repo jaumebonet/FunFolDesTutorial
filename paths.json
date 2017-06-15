@@ -1,0 +1,18 @@
+{
+    "rosetta":
+    {
+        "path": "/Volumes/MiniOne/Projects/BonetJaume/RosettaFFL/side_changes/source/bin/",
+        "version": "macosclangrelease"
+    },
+    "tests":
+    [
+      {
+        "scenarios/nobinder/onesegment":
+        [
+          "simple_run",
+          "smaller_run",
+          "larger_run"
+        ]
+      }
+    ]
+}

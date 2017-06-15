@@ -1,4 +1,4 @@
-<MoveMapFactory name="FFLSTANDARD" >
+<MoveMapFactory name="FFLSTANDARD_MOVEMAP" >
   <Backbone enable="true" residue_selector="FLEXIBLE_OR_TEMPLATE" />
   <Chi      enable="true" residue_selector="COLDSPOT_OR_FLEXIBLE_OR_TEMPLATE" />
 </MoveMapFactory>

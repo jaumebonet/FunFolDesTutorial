@@ -1,8 +1,0 @@
--parser:protocol script.xml
--s 4l8i.pdb.gz
-
--overwrite
--in:ignore_unrecognized_res
-
--out:levels protocols.fold_from_loops:500
--out:mute protocols.abinitio
