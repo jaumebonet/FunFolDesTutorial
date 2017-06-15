@@ -2,5 +2,7 @@ score.sc
 *_00??.pdb
 *_pose.pdb
 *.rslog
+*_tutorial_silent
 
+scenarios/run_test.log
 benchmark/*

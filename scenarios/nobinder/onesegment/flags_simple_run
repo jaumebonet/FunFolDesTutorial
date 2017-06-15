@@ -2,8 +2,8 @@
 -s 4l8i.pdb.gz
 
 -out:prefix simple_run
--out:file:silent simple_run_tutorial
--out:nstruct 1
+-out:file:silent simple_run_tutorial_silent
+-out:nstruct 10
 
 -overwrite
 -in:ignore_unrecognized_res
