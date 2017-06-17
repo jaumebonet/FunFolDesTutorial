@@ -1,0 +1,13 @@
+-parser:protocol simple_run.xml
+-s 4l8i.pdb.gz
+
+-out:prefix simple_run
+-out:file:silent simple_run_tutorial_silent
+-out:nstruct 2
+
+-overwrite
+-in:ignore_unrecognized_res
+-out:file:silent_struct_type binary
+
+-out:levels protocols.fold_from_loops:500
+-out:mute protocols.abinitio

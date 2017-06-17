@@ -1,0 +1,3 @@
+*.xml linguist-language=xml
+*pdb.gz linguist-documentation
+*.*mers lingust-documentation
