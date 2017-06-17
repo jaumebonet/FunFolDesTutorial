@@ -3,7 +3,7 @@
 
 -out:prefix simple_run
 -out:file:silent simple_run_tutorial_silent
--out:nstruct 10
+-out:nstruct 2
 
 -overwrite
 -in:ignore_unrecognized_res
