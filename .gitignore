@@ -2,6 +2,7 @@ score.sc
 *_00??.pdb
 *_pose.pdb
 *.rslog
+*.sc
 *_tutorial_silent
 
 database/vall.jul19.2011.gz

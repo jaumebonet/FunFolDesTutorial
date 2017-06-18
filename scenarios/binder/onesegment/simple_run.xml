@@ -34,10 +34,10 @@
 
   <FILTERS>
     # We will check at the end the final RMSD between the template and the Design
-    <RmsdFromResidueSelector name="final_rmsd" confidence="0"
+    <RmsdFromResidueSelectorFilter name="final_rmsd" confidence="0"
         reference_name="template_pose" reference_selector="chA"
         query_selector="chP" />
-    <ScorePoseSegmentFromResidueSelector name="design_score" confidence="0"
+    <ScorePoseSegmentFromResidueSelectorFilter name="design_score" confidence="0"
       residue_selector="chP" />
   </FILTERS>
 
