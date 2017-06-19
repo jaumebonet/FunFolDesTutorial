@@ -1,8 +1,8 @@
--parser:protocol simple_run.xml
--s 4l8i.pdb.gz
+-parser:protocol mixCYD_run.xml
+-s 4zqk.pdb.gz
 
--out:prefix simple_run
--out:file:silent simple_run_tutorial_silent
+-out:prefix mixCYD_
+-out:file:silent mixCYD_tutorial_silent
 -out:nstruct 1
 
 -overwrite

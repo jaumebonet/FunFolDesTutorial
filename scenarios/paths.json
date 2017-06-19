@@ -11,6 +11,12 @@
         [
           "simple_run"
         ]
+      },
+      {
+        "binder/onesegment":
+        [
+          "simple_run"
+        ]
       }
     ]
 }

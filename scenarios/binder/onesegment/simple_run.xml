@@ -10,7 +10,7 @@
   </SCOREFXNS>
 
   <RESIDUE_SELECTORS>
-    <xi:include href="selectors.xml" />               # Standard FFL ResidueSelectors.
+    <xi:include href="xml_pieces/selectors.xml" />    # Standard FFL ResidueSelectors.
     # Template Scaffold Selectors.
     <Index name="insertion" resnums="65A-86A" />      # Placement of the motif (region we remove).
     <Chain name="chA" chains="A" />                   # Template Chain (there can only be one!).
@@ -25,11 +25,11 @@
   </RESIDUE_SELECTORS>
 
   <MOVE_MAP_FACTORIES>
-    <xi:include href="movemap.xml" />                 # Standard FFL MoveMap
+    <xi:include href="xml_pieces/movemap.xml" />      # Standard FFL MoveMap
   </MOVE_MAP_FACTORIES>
 
   <TASKOPERATIONS>
-    <xi:include href="taskoperators.xml" />           # Standard FFL TaskOperators
+    <xi:include href="xml_pieces/taskoperators.xml" /># Standard FFL TaskOperators
   </TASKOPERATIONS>
 
   <FILTERS>
@@ -37,6 +37,7 @@
     <RmsdFromResidueSelectorFilter name="final_rmsd" confidence="0"
         reference_name="template_pose" reference_selector="chA"
         query_selector="chP" />
+    # Make sure to get an evaluation of the design alone
     <ScorePoseSegmentFromResidueSelectorFilter name="design_score" confidence="0"
       residue_selector="chP" />
   </FILTERS>
