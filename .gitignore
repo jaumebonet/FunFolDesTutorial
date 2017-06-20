@@ -7,4 +7,4 @@ score.sc
 
 database/vall.jul19.2011.gz
 scenarios/run_test.log
-benchmark/*
+benchmark/binder/binderbench_*
