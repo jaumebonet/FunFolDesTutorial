@@ -24,6 +24,6 @@ if [ ${SLURM_ARRAY_TASK_ID} -gt 400 ]; then
     BINDWEIGTH=2.0
 fi
 
-srun /scratch/lpdi/bin/Rosetta/devel/nubinitio/main/source/bin/rosetta_scripts.linuxiccrelease @nubinitio_flags -out:suffix _${experiment}_${BINDWEIGTH}_${SLMURM_ARRAY_TASK_ID} -out:file:silent ${experiment}_${BINDWEIGTH}_${SLURM_ARRAY_TASK_ID} -parser:script_vars bindweight=${BINDWEIGTH} 
+srun /scratch/lpdi/bin/Rosetta/devel/nubinitio/main/source/bin/rosetta_scripts.linuxiccrelease @nubinitio_flags -out:suffix _${experiment}_${BINDWEIGTH}_${SLURM_ARRAY_TASK_ID} -out:file:silent ${experiment}_${BINDWEIGTH}_${SLURM_ARRAY_TASK_ID} -parser:script_vars bindweight=${BINDWEIGTH} 
 echo "CASTOR: RUN FINISHED"
 
