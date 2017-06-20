@@ -49,10 +49,13 @@
 
   <MOVERS>
     # We will save the template, as it is also our target, here.
-    <SavePoseMover name="saveTarget" reference_name="target_pose" restore_pose="false" />
+    <SavePoseMover name="saveTemplate" restore_pose="0" reference_name="template_pose" />
+    # This is one of the alternatives to load the target motif's pdb file.
+    <SavePoseMover name="load_target" reference_name="target_pose" pdb_file="4zqk.pdb.gz" />
     # Both to create the fragments needed for NubInitio as well as for the NubInitio itself,
     # only one-chain templates can be considered, so we'll need to delete the rest.
-    <DeleteRegionMover name="removeExtraChains" residue_selector="!chAprot" />
+    <DeleteRegionMover name="removeNonProtein" residue_selector="!PROTEIN" />
+    <DeleteRegionMover name="removeExtraChains" residue_selector="!chA" />
     # The creates the fragments (if they need to be created) or loads them from a file
     # into the DataMap with the "frags" identifier (that needs to be specified in the NubInitio).
     <StructFragmentMover name="FragmentPicker" prefix="frags"
@@ -65,7 +68,7 @@
     </AddConstraints>
     # The NubInitio folding is done here.
     <NubInitioMover name="FFL" fragments_id="frags" template_motif_selector="insertion" use_cst="true"
-      rmsd_threshold="5" centroid_scorefxn="centroid" fullatom_scorefxn="fullatom" binder_weight="%%binder_weight%%">
+      rmsd_threshold="5" centroid_scorefxn="centroid" fullatom_scorefxn="fullatom" >
       <Nub reference_name="target_pose" residue_selector="insertion" binder_selector="binder" >
         <Segment order="1" c_term_flex="2" />
         <Segment order="2" n_term_flex="2" />
@@ -75,22 +78,23 @@
     </NubInitioMover>
 
     # Edit the sequence to stabilize the protein
-    <FastRelax name="DesignRelax" scorefxn="fullatom" disable_design="false"
-               task_operations="FFLMOTIF_TASKOP,FFLTEMPLATE_TASKOP"
-               repeats="3" delete_virtual_residues_after_FastRelax="true"
+    <FastDesign name="DesignRelax" scorefxn="fullatom"
+               task_operations="FFLMOTIF_TASKOP,FFLTEMPLATE_TASKOP,FFLTEMPLATE_DISULFIDES"
+               repeats="1" delete_virtual_residues_after_FastRelax="true"
                movemap_factory="FFLSTANDARD_MOVEMAP" >
-    </FastRelax>
+    </FastDesign>
     # Evaluate binding
     <ddG name="ddg" per_residue_ddg="1" scorefxn="fullatom" chain_num="2" />
 
-    <ResidueLabelsToPymolSelectionMover name="pymolselect"/>
+    <ResidueLabelsToPymolSelectionMover name="pymolselect"  pdb_count="true" />
 
   </MOVERS>
   <APPLY_TO_POSE>
   </APPLY_TO_POSE>
   <PROTOCOLS>
     # Preparing the Template
-    <Add mover="saveTarget" />
+    <Add mover="removeNonProtein" />
+    <Add mover="saveTemplate" />
     <Add mover="removeExtraChains" />
     <Add mover="FragmentPicker" />
     <Add mover="addCST" />

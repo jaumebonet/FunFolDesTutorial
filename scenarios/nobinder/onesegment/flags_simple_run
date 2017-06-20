@@ -1,11 +1,12 @@
 -parser:protocol simple_run.xml
 -s 4l8i.pdb.gz
 
--out:prefix simple_run
+-out:prefix simple_run_
 -out:file:silent simple_run_tutorial_silent
 -out:nstruct 1
 
 -overwrite
+-in:ignore_waters
 -in:ignore_unrecognized_res
 -out:file:silent_struct_type binary
 

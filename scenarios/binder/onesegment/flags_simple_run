@@ -1,13 +1,14 @@
 -parser:protocol simple_run.xml
 -s 4l8i.pdb.gz
 
--out:prefix simple_run
--out:file:silent simple_run_tutorial_silent
+#-out:prefix simple_run_
+#-out:file:silent simple_run_tutorial_silent
 -out:nstruct 1
 
 -overwrite
 -in:ignore_unrecognized_res
--out:file:silent_struct_type binary
+-in:ignore_waters
+#-out:file:silent_struct_type binary
 
--out:levels protocols.fold_from_loops:500
+-out:levels protocols.fold_from_loops:500 protocols.relax:500 protocols.denovo_design.movers.FastDesign:500 protocols.rosetta_scripts.ParsedProtocol:500
 -out:mute protocols.abinitio

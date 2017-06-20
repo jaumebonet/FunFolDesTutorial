@@ -62,13 +62,13 @@
       </Nub>
     </NubInitioMover>
     # Edit the sequence to stabilize the protein
-    <FastRelax name="DesignRelax" scorefxn="fullatom" disable_design="false"
+    <FastDesign name="DesignRelax" scorefxn="fullatom"
                task_operations="FFLMOTIF_TASKOP,FFLTEMPLATE_TASKOP"
                repeats="3" delete_virtual_residues_after_FastRelax="true"
                movemap_factory="FFLSTANDARD_MOVEMAP" >
-    </FastRelax>
+    </FastDesign>
 
-    <ResidueLabelsToPymolSelectionMover name="pymolselect"/>
+    <ResidueLabelsToPymolSelectionMover name="pymolselect" pdb_count="true" />
   </MOVERS>
 
   <APPLY_TO_POSE>
