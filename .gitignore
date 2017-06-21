@@ -2,8 +2,9 @@ score.sc
 *_pose.pdb
 *.rslog
 *.sc
-*_tutorial_silent
+*_silent
 
 database/vall.jul19.2011.gz
 scenarios/run_test.log
 benchmark/binder/binderbench_*
+benchmark/constraints/constraintbench_*
