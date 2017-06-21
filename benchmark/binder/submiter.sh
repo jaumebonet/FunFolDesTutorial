@@ -8,7 +8,7 @@
 #SBATCH --output=/scratch/bonet/logs/binderbench.%A_%a.out
 #SBATCH --error=/scratch/bonet/logs/binderbench.%A_%a.err
 
-BINDWEIGTH=0
+BINDWEIGTH=0.0
 experiment=binderbench
 
 if [ ${SLURM_ARRAY_TASK_ID} -gt 100 ]; then

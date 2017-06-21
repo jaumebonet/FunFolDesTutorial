@@ -5,10 +5,10 @@
 #SBATCH --mem 4000
 #SBATCH --time 15:00:00
 #SBATCH --array=1-500
-#SBATCH --output=/users/bonet/logs/constraintbench.%A_%a.out
-#SBATCH --error=/users/bonet/logs/constraintbench.%A_%a.err
+#SBATCH --output=/scratch/bonet/logs/constraintbench.%A_%a.out
+#SBATCH --error=/scratch/bonet/logs/constraintbench.%A_%a.err
 
-CSTWEIGTH=0
+CSTWEIGTH=0.0
 experiment=constraintbench
 
 if [ ${SLURM_ARRAY_TASK_ID} -gt 100 ]; then
@@ -24,6 +24,6 @@ if [ ${SLURM_ARRAY_TASK_ID} -gt 400 ]; then
     CSTWEIGTH=2.0
 fi
 
-srun /scratch/snx3000/jbonet/bin/main/source/bin/rosetta_scripts.linuxiccrelease @nubinitio_flags -out:suffix _${experiment}_${CSTWEIGTH}_${SLURM_ARRAY_TASK_ID} -out:file:silent ${experiment}_${CSTWEIGTH}_${SLURM_ARRAY_TASK_ID} -parser:script_vars cstweight=${CSTWEIGTH} 
+srun /scratch/lpdi/bin/Rosetta/devel/nubinitio/main/source/bin/rosetta_scripts.linuxiccrelease @nubinitio_flags -out:suffix _${experiment}_${CSTWEIGTH}_${SLURM_ARRAY_TASK_ID} -out:file:silent ${experiment}_${CSTWEIGTH}_${SLURM_ARRAY_TASK_ID} -parser:script_vars cstweight=${CSTWEIGTH} 
 echo "CSCS DAINT: RUN FINISHED"
 
