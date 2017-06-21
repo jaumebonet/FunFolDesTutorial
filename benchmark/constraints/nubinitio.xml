@@ -66,10 +66,11 @@
     <AddConstraints name="addCST" >
       <AtomPairConstraintGenerator name="atompairCST" sd="4.0" ca_only="true"
         use_harmonic="true" unweighted="true" min_seq_sep="6" max_distance="40" residue_selector="chB" />
+      <SheetConstraintGenerator name="sheetCST" blueprint="../4zqk3_0001.blue" dist="5.5" dist_tolerance="1.0"
+	angle_tolerance="0.35" bb_dihedral_tolerance="0.52" weight="2.0" />
     </AddConstraints>
     <ReleaseConstraintFromResidueMover name="releaseCST" residue_selector="unconstrained" />
-    <SheetConstraintGenerator name="sheetCST" blueprint="../4zqk3_0001.blue" dist="5.5" dist_tolerance="1.0" angle_tolerance="0.35" bb_dihedral_tolerance="0.52" weight="2.0" />
-    <CstInfoMover name="showCST" dump_cst_file="constraintbench.cst" recursive="true" />
+    <CstInfoMover name="reportCST" dump_cst_file="constraintbench.cst" recursive="true" />
 
     # The NubInitio folding is done here.
     <NubInitioMover name="FFL" fragments_id="frags" template_motif_selector="insertion" use_cst="true"
@@ -96,9 +97,10 @@
     <Add mover="removeExtraChains" />
     <Add mover="FragmentPicker" />
     <Add mover="addCST" />
-    <Add mover="sheetCST" />
     <Add mover="releaseCST" />
-    <Add mover="reportCST" />
+    # Run this only on test, once we have it does not need to
+    # be printed each time...
+    <!-- <Add mover="reportCST" />--> 
     # Fold
     <Add mover="FFL" />
     # Design
