@@ -1,6 +1,10 @@
 import os
 import json
+import shutil
 import subprocess
+
+if not os.path.file("paths.json.user"):
+    shutil.copyfile("paths.json", "paths.json.user")
 
 paths   = json.loads("".join([x.strip() for x in open("paths.json").readlines()]))
 RS_path = paths["rosetta"]["path"]
