@@ -6,5 +6,5 @@ score.sc
 
 database/vall.jul19.2011.gz
 scenarios/run_test.log
-benchmark/binder/binderbench_*
-benchmark/constraints/constraintbench_*
+benchmark/score_weights/binder/binderbench_*
+benchmark/score_weights/constraints/constraintbench_*

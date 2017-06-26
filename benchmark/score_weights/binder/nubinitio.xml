@@ -20,12 +20,27 @@
     <Index name="motif3" resnums="91B-95B" />
     <Index name="motif4" resnums="101B-103B" />
     <Or name="insertion" selectors="motif1,motif2,motif3,motif4" />
+    # Target Motif Selectors.
+    <Chain name="binder" chains="A" />                # Binder for the functional motif
 
     # Regions that we want to keep unconstrained
     <Index name="uc1" resnums="38B-44B" />
     <Index name="uc2" resnums="51B-63B" />
     <Index name="uc3" resnums="96B-100B" />
     <Or name="unconstrained" selectors="uc1,uc2,uc3" />
+
+    # Mutants in the HighAfinity (5ius)
+    <Index name="ha1" resnums="32B-34B" />
+    <Index name="ha2" resnums="36B" />
+    <Index name="ha3" resnums="38B" />
+    <Index name="ha4" resnums="42B" />
+    <Index name="ha5" resnums="46B" />
+    <Index name="ha6" resnums="61B" />
+    <Index name="ha7" resnums="93B" />
+    <Index name="ha8" resnums="100B" />
+    <Or name="highaffinity" selectors="ha1,ha2,ha3,ha4,ha5,ha6,ha7,ha8" />
+    <And name="coldaffinity" selectors="highaffinity,MOTIF" />
+
   </RESIDUE_SELECTORS>
 
   <MOVE_MAP_FACTORIES>
@@ -44,6 +59,8 @@
         reference_name="template_pose" reference_selector="chB"
         query_selector="chB" />
     # Make sure to get an evaluation of the design alone
+    <ScorePoseSegmentFromResidueSelectorFilter name="design_score" confidence="0"
+      residue_selector="chB" scorefxn="fullatom" />
     <ConstraintFulfilmentFilter name="unf_atompair" distance="1" angle="0" dihedral="0" confidence="0" />
     <ConstraintFulfilmentFilter name="unf_angle" distance="0" angle="1" dihedral="0" confidence="0" />
     <ConstraintFulfilmentFilter name="unf_dihedral" distance="0" angle="0" dihedral="1" confidence="0" />
@@ -53,7 +70,7 @@
     # We will save the template, as it is also our target, here.
     <SavePoseMover name="saveTemplate" restore_pose="0" reference_name="template_pose" />
     # This is one of the alternatives to load the target motif's pdb file.
-    <SavePoseMover name="load_target" reference_name="target_pose" pdb_file="../4zqk3_0001.pdb" />
+    <SavePoseMover name="load_target" reference_name="target_pose" pdb_file="pdbs/4zqk3_0001.pdb" />
     # Both to create the fragments needed for NubInitio as well as for the NubInitio itself,
     # only one-chain templates can be considered, so we'll need to delete the rest.
     <DeleteRegionMover name="removeExtraChains" residue_selector="!chB" />
@@ -66,18 +83,19 @@
     <AddConstraints name="addCST" >
       <AtomPairConstraintGenerator name="atompairCST" sd="4.0" ca_only="true"
         use_harmonic="true" unweighted="true" min_seq_sep="6" max_distance="40" residue_selector="chB" />
-      <SheetConstraintGenerator name="sheetCST" blueprint="../4zqk3_0001.blue" dist="5.5" dist_tolerance="1.0"
-	angle_tolerance="0.35" bb_dihedral_tolerance="0.52" weight="2.0" />
     </AddConstraints>
     <ReleaseConstraintFromResidueMover name="releaseCST" residue_selector="unconstrained" />
-    <CstInfoMover name="reportCST" dump_cst_file="constraintbench.cst" recursive="true" />
 
     # The NubInitio folding is done here.
     <NubInitioMover name="FFL" fragments_id="frags" template_motif_selector="insertion" use_cst="true"
         rmsd_threshold="5" centroid_scorefxn="centroid" fullatom_scorefxn="fullatom" break_side_ramp="true"
-        angle_weight="%%cstweight%%" dihedral_weight="%%cstweight%%">
-      <Nub reference_name="target_pose" residue_selector="insertion" />
+        binder_weight="%%bindweight%%" >
+      <Nub reference_name="target_pose" residue_selector="insertion" binder_selector="binder" />
     </NubInitioMover>
+    # Mark residues from the high affinity to be labeled as COLDSPOTS
+    <LabelPoseFromResidueSelectorMover name="relabel1" property="HOTSPOT" reverse="true" residue_selector="coldaffinity" />
+    <LabelPoseFromResidueSelectorMover name="relabel2" property="COLDSPOT" residue_selector="coldaffinity" />
+    <DisplayPoseLabelsMover name="show_labels" />
 
     # Edit the sequence to stabilize the protein
     <FastDesign name="DesignRelax" scorefxn="fullatom"
@@ -85,6 +103,8 @@
                repeats="1" delete_virtual_residues_after_FastRelax="true"
                movemap_factory="FFLSTANDARD_MOVEMAP" >
     </FastDesign>
+    # Evaluate binding
+    <ddG name="ddg" per_residue_ddg="1" scorefxn="fullatom" chain_num="2" />
 
     <ResidueLabelsToPymolSelectionMover name="pymolselect"  pdb_count="true" />
 
@@ -98,18 +118,20 @@
     <Add mover="FragmentPicker" />
     <Add mover="addCST" />
     <Add mover="releaseCST" />
-    # Run this only on test, once we have it does not need to
-    # be printed each time...
-    <!-- <Add mover="reportCST" />--> 
     # Fold
     <Add mover="FFL" />
+    <Add mover="relabel1" />
+    <Add mover="relabel2" />
+    <Add mover="show_labels" />
     # Design
     <Add mover="DesignRelax" />
     # Evaluate
     <Add filter="final_rmsd" />
+    <Add filter="design_score" />
     <Add filter="unf_atompair" />
     <Add filter="unf_angle" />
     <Add filter="unf_dihedral" />
+    <Add mover="ddg" />
     <Add mover="pymolselect" />
   </PROTOCOLS>
   <OUTPUT />
