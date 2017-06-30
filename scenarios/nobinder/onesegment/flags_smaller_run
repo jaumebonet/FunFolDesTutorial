@@ -1,0 +1,14 @@
+-parser:protocol smaller_run.xml
+-s 4l8i.pdb.gz
+
+-out:prefix smaller_run_
+-out:file:silent smaller_run_tutorial_silent
+-out:nstruct 2
+
+-overwrite
+-in:ignore_waters
+-in:ignore_unrecognized_res
+-out:file:silent_struct_type binary
+
+-out:levels protocols.fold_from_loops:500
+-out:mute protocols.abinitio

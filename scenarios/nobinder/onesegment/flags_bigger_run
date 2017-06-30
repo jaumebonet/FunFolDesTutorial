@@ -3,7 +3,7 @@
 
 -out:prefix bigger_run_
 -out:file:silent bigger_run_tutorial_silent
--out:nstruct 1
+-out:nstruct 2
 
 -overwrite
 -in:ignore_waters

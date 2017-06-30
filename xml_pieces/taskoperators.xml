@@ -5,6 +5,6 @@
   <DisallowIfNonnativeRLT disallow_aas="C" />
 </OperateOnResidueSubset>
 <OperateOnResidueSubset name="FFLEXTRA_TASKOP" selector="COLDSPOT_OR_TEMPLATE" >
-  <ExtraRotamersGenericRLT ex1="1" ex2="1" extrachi_cutoff="0" />
+  <ExtraRotamersGenericRLT ex1="1" ex2="1" />
 </OperateOnResidueSubset>
 <NoRepackDisulfides name="FFLTEMPLATE_DISULFIDES" />

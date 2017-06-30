@@ -9,13 +9,25 @@
       {
         "nobinder/onesegment":
         [
-          "simple_run"
+          "simple_run", "bigger_run", "smaller_run"
+        ]
+      },
+      {
+        "nobinder/multisegment":
+        [
+          "mixCYD_run"
         ]
       },
       {
         "binder/onesegment":
         [
           "simple_run"
+        ]
+      },
+      {
+        "binder/multisegment":
+        [
+          "mixCYD_run"
         ]
       }
     ]

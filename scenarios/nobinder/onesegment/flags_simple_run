@@ -3,7 +3,7 @@
 
 -out:prefix simple_run_
 -out:file:silent simple_run_tutorial_silent
--out:nstruct 1
+-out:nstruct 2
 
 -overwrite
 -in:ignore_waters
