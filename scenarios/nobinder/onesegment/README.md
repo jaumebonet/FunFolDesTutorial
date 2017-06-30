@@ -1,4 +1,4 @@
-# One Segment, No Binder  
+# One Segment, No Binder
 
 There are three examples here; one in which the insertion segment keeps the length of the segment it substitutes in the template protein and two that change that length.
 
@@ -61,7 +61,7 @@ The general parameters are the same as with the previous case, but the piece ext
 
 Key difference between the script for this model (```biger_run.xml```) and the regular one (```simple_run.xml```) is the correct definition of the used template (selector ```<And name="chA!insert" selectors="chA,!insertion" />```) so that the right part is used to evaluate the final __RMSD__ (thus, is not key for the protocol but to obtain reliable filtering values).
 
-## Bigger Size insertion (smaller_run)  
+## Bigger Size insertion (smaller_run)
 
 It should look like this:
 ```
