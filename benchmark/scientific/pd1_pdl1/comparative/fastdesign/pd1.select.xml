@@ -1,0 +1,30 @@
+# Design And Template chain is B (PD1)
+<Chain name="designChain" chains="B" />
+<Not name="!designChain"  selector="designChain" />
+
+# Template Scaffold AND Motif Selectors (insertion over itself)
+<Index name="motif1" resnums="34B-36B" />
+<Index name="motif2" resnums="46B-48B" />
+<Index name="motif3" resnums="91B-95B" />
+<Index name="motif4" resnums="101B-103B" />
+<Or name="insertion"   selectors="motif1,motif2,motif3,motif4" />
+<Not name="!insertion" selector="insertion" />
+# Binder Chain is A (PDL1)
+<Chain name="binderChain" chains="A" />
+<Not name="!binderChain"  selector="binderChain" />
+<And name="template"      selectors="!insertion,!binderChain" />
+
+# Mutants in the HighAfinity (from 5ius)
+# This regions must be allowed to mutate
+<Index name="ha1" resnums="32B-34B" />
+<Index name="ha2" resnums="36B" />
+<Index name="ha3" resnums="38B" />
+<Index name="ha4" resnums="42B" />
+<Index name="ha5" resnums="46B" />
+<Index name="ha6" resnums="61B" />
+<Index name="ha7" resnums="93B" />
+<Index name="ha8" resnums="100B" />
+<Or name="highAffinity"   selectors="ha1,ha2,ha3,ha4,ha5,ha6,ha7,ha8" />
+<And name="coldAffinity"  selectors="highAffinity,MOTIF" />
+<Not name="!coldAffinity" selector="coldAffinity" />
+<And name="placedhot"     selectors="MOTIF,!coldAffinity" />

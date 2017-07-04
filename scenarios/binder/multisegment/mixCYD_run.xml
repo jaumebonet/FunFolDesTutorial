@@ -68,7 +68,7 @@
     </AddConstraints>
     # The NubInitio folding is done here.
     <NubInitioMover name="FFL" fragments_id="frags" template_motif_selector="insertion" use_cst="true"
-      rmsd_threshold="5" centroid_scorefxn="centroid" fullatom_scorefxn="fullatom" >
+      rmsd_threshold="5" fullatom_scorefxn="fullatom" >
       <Nub reference_name="target_pose" residue_selector="insertion" binder_selector="binder" >
         <Segment order="1" c_term_flex="2" />
         <Segment order="2" n_term_flex="2" />
