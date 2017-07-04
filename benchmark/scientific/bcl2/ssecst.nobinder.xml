@@ -47,7 +47,7 @@
     <Or name="target_alphas" selectors="target_h1,target_h2,target_h3" />
 
     # We will create constraints only inside each alpha helix, so we need to find them
-    <SecondaryStructureSelector name="helix" ss="H" use_dssp="1" />
+    <SecondaryStructure name="helix" ss="H" use_dssp="1" />
 
   </RESIDUE_SELECTORS>
 
