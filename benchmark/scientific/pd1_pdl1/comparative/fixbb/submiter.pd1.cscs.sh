@@ -5,9 +5,9 @@
 #SBATCH --time 24:00:00
 #SBATCH --partition=normal
 #SBATCH --constraint=gpu
-#SBATCH --job-name="pdl1_fastdesign_ffl_bench"
-#SBATCH --output=pdl1_fastdesign_ffl_bench_%A.out
-#SBATCH --error=pdl1_fastdesign_ffl_bench_%A.err
+#SBATCH --job-name="pd1_fixbb_ffl_bench"
+#SBATCH --output=pd1_fixbb_ffl_bench_%A.out
+#SBATCH --error=pd1_fixbb_ffl_bench_%A.err
 
 module switch PrgEnv-cray PrgEnv-intel
 module load daint-gpu
@@ -16,10 +16,10 @@ export OMP_NUM_THREADS=1
 
 ROSETTAPATH="/scratch/snx3000/jbonet/bin/main/source/bin/"
 ROSETTADIST="mpi.linuxiccrelease"
-TARGET="pdl1"
-PDB="pdbs/4zqk.pdb.gz"
+TARGET="pd1"
+PDB="pdbs/4zqk3_0001.pdb"
 NSTRUCT=1000
-EXPERIMENT="fastdesign"
+EXPERIMENT="fixbb"
 JOBID=2
 SUFFIX=${EXPERIMENT}_${JOBID}_${SLURM_TASK_PID}
 

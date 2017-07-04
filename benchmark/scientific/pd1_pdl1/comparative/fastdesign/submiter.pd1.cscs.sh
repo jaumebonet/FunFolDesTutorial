@@ -23,7 +23,7 @@ EXPERIMENT="fastdesign"
 JOBID=2
 SUFFIX=${EXPERIMENT}_${JOBID}_${SLURM_TASK_PID}
 
-srun -n $SLURM_NTASKS --ntasks-per-node=$SLURM_NTASKS_PER_NODE -c $SLURM_CPUS_PER_TASK ${ROSETTAPATH}rosetta_scripts.${ROSETTADIST} -parser:protocol fastdesign.${TARGET}.xml @common_flags -s ${PDB} -out:nstruct ${NSTRUCT} -out:prefix ${TARGET}_ -out:suffix _${SUFFIX} -out:file:silent ${TARGET}_${SUFFIX} -mpi_tracer_to_file ./tracer_${SLURM_TASK_PID}.log
+srun -n $SLURM_NTASKS --ntasks-per-node=$SLURM_NTASKS_PER_NODE -c $SLURM_CPUS_PER_TASK ${ROSETTAPATH}rosetta_scripts.${ROSETTADIST} -parser:protocol ${EXPERIMENT}.${TARGET}.xml @common_flags -s ${PDB} -out:nstruct ${NSTRUCT} -out:prefix ${TARGET}_ -out:suffix _${SUFFIX} -out:file:silent ${TARGET}_${SUFFIX} -mpi_tracer_to_file ./tracer_${SLURM_TASK_PID}.log
 
 echo "DAINT: RUN FINISHED"
 
