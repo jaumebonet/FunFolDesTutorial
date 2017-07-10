@@ -48,7 +48,7 @@
     <Or name="target_alphas" selectors="target_h1,target_h2,target_h3" />
 
     # We will create constraints only inside each alpha helix, so we need to find them
-    <SecondaryStructureSelector name="helix" ss="H" use_dssp="1" />
+    <SecondaryStructure name="helix" ss="H" use_dssp="1" />
 
   </RESIDUE_SELECTORS>
 
@@ -77,6 +77,9 @@
     # Needs to be preceded by an alignment through the region of interest
     <RmsdFromResidueSelectorFilter name="LHRMSD2Target"  superimpose="false"
       reference_name="target_pose" reference_selector="target_alphas" query_selector="target_alphas" confidence="0" />
+    # Make sure to get an evaluation of the design alone
+    <ScorePoseSegmentFromResidueSelectorFilter name="design_score" confidence="0"
+            residue_selector="chB" scorefxn="fullatom" />
   </FILTERS>
 
   <MOVERS>
@@ -155,6 +158,7 @@
     <Add mover="align" />
     <Add filter="LRMSD2Target" />
     <Add filter="LHRMSD2Target" />
+    <Add filter="design_score" />
   </PROTOCOLS>
 
 </ROSETTASCRIPTS>

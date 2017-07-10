@@ -3,7 +3,11 @@ score.sc
 *.rslog
 *.sc
 *_silent
+tracer*
+*.out
+*.err
 
+.ipynb_checkpoints/
 database/vall.jul19.2011.gz
 scenarios/run_test.log
 benchmark/score_weights/binder/binderbench_*

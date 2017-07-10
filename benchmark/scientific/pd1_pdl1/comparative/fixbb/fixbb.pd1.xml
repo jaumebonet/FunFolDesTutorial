@@ -1,0 +1,71 @@
+<ROSETTASCRIPTS>
+
+  <SCOREFXNS>
+    <ScoreFunction name="fullatom" weights="talaris2014" />
+  </SCOREFXNS>
+
+  <RESIDUE_SELECTORS>
+    <xi:include href="xml_pieces/selectors.xml" />    # Standard FFL ResidueSelectors.
+    <xi:include href="pd1.select.xml" />              # Regions of interest of the Design
+  </RESIDUE_SELECTORS>
+
+  <MOVE_MAP_FACTORIES>
+    <xi:include href="xml_pieces/movemap.xml" />      # Standard FFL MoveMap
+    <MoveMapFactory name="FIXBB_MOVEMAP" bb="false" chi="false" nu="false" branches="false" jumps="false" >
+  	<Chi enable="true" residue_selector="COLDSPOT_OR_FLEXIBLE_OR_TEMPLATE" />
+    </MoveMapFactory>
+  </MOVE_MAP_FACTORIES>
+
+  <TASKOPERATIONS>
+    <xi:include href="xml_pieces/taskoperators.xml" /># Standard FFL TaskOperators
+  </TASKOPERATIONS>
+
+  <FILTERS>
+    <RmsdFromResidueSelectorFilter name="final_rmsd" confidence="0" threshold="5"
+            reference_name="template_pose" reference_selector="designChain"
+            query_selector="designChain" />
+    # Make sure to get an evaluation of the design alone
+    <ScorePoseSegmentFromResidueSelectorFilter name="design_score" confidence="0"
+            residue_selector="designChain" scorefxn="fullatom" />
+  </FILTERS>
+
+  <MOVERS>
+    <SavePoseMover name="saveTemplate" restore_pose="0" reference_name="template_pose" />
+    <DeleteRegionMover name="removeNonProtein" residue_selector="!PROTEIN" />
+    # We mimick the FFL labeling so we can apply the same MoveMap and Design TaskOperations
+    <LabelPoseFromResidueSelectorMover name="labelMOTIF"    property="MOTIF"    residue_selector="insertion" />
+    <LabelPoseFromResidueSelectorMover name="labelTEMPLATE" property="TEMPLATE" residue_selector="template" />
+    <LabelPoseFromResidueSelectorMover name="labelCONTEXT"  property="CONTEXT"  residue_selector="binderChain" />
+    <LabelPoseFromResidueSelectorMover name="labelCOLDSPOT" property="COLDSPOT" residue_selector="coldAffinity" />
+    <LabelPoseFromResidueSelectorMover name="labelHOTSPOT"  property="HOTSPOT"  residue_selector="placedhot" />
+    <DisplayPoseLabelsMover name="showLabels" />
+
+    #FastDesign
+    <FastDesign name="DesignRelax" scorefxn="fullatom"
+                task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP,FFLTEMPLATE_DISULFIDES"
+                repeats="3" delete_virtual_residues_after_FastRelax="true"
+                movemap_factory="FIXBB_MOVEMAP" />
+    # Evaluate binding
+    <ddG name="ddg" per_residue_ddg="0" scorefxn="fullatom" chain_num="2" />
+    <ContactMap name="contacts" region1="A" region2="B" to_score="true" mutants="true" reset_count="true" />
+  </MOVERS>
+
+  <PROTOCOLS>
+    <Add mover="removeNonProtein" />
+    <Add mover="saveTemplate" />
+    # Labeling
+    <Add mover="labelMOTIF" />
+    <Add mover="labelTEMPLATE" />
+    <Add mover="labelCONTEXT" />
+    <Add mover="labelCOLDSPOT" />
+    <Add mover="labelHOTSPOT" />
+    <Add mover="showLabels" />
+    # Design
+    <Add mover="DesignRelax" />
+    # Evaluate
+    <Add filter="final_rmsd" />
+    <Add filter="design_score" />
+    <Add mover="ddg" />
+    <Add mover="contacts" />
+  </PROTOCOLS>
+</ROSETTASCRIPTS>

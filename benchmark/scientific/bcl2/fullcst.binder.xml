@@ -74,6 +74,9 @@
     # Needs to be preceded by an alignment through the region of interest
     <RmsdFromResidueSelectorFilter name="LHRMSD2Target"  superimpose="false"
       reference_name="target_pose" reference_selector="target_alphas" query_selector="target_alphas" confidence="0" />
+    # Make sure to get an evaluation of the design alone
+    <ScorePoseSegmentFromResidueSelectorFilter name="design_score" confidence="0"
+            residue_selector="chB" scorefxn="fullatom" />
   </FILTERS>
 
   <MOVERS>
@@ -102,7 +105,7 @@
     # Use distance atompairconstraints to guide the folding
     <AddConstraints name="addCST" >
       <AtomPairConstraintGenerator name="atompairCST" sd="2.0" ca_only="true"
-        use_harmonic="true" unweighted="true" min_seq_sep="6" max_distance="40" residue_selector="chA"
+        use_harmonic="true" unweighted="true" min_seq_sep="6" max_distance="40" residue_selector="chS"
       />
     </AddConstraints>
     # After folding, we will remove the constraints so that the design process is not guided by
@@ -152,6 +155,7 @@
     <Add mover="align" />
     <Add filter="LRMSD2Target" />
     <Add filter="LHRMSD2Target" />
+    <Add filter="design_score" />
   </PROTOCOLS>
 
 </ROSETTASCRIPTS>

@@ -1,0 +1,18 @@
+# When comparing with the target structure, we will do it only with alpha helix
+# that are not completely moving on its own (for fairness)
+<Index name="target_h1"  resnums="5A-18A" />
+<Index name="target_h2"  resnums="20A-34A" />
+<Index name="target_h3"  resnums="38A-43A" />
+<Index name="target_h4"  resnums="53A-71A" />
+<Index name="target_h5"  resnums="76A-88A" />
+<Index name="target_h6"  resnums="95A-111A" />
+<Index name="target_h7"  resnums="121A-137A" />
+<Or name="target_alphas" selectors="target_h1,target_h2,target_h3,target_h4,target_h5,target_h6,target_h7" />
+
+# We will use three different target alignments (one per helix)
+<Index name="target_ali_1" resnums="9A-14A" />
+<Index name="target_ali_2" resnums="59A-67A" />
+<Index name="target_ali_3" resnums="124A-133A" />
+
+# We only evaluate on one chain
+<Chain name="target_chain" chains="A" />
