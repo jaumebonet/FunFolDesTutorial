@@ -4,19 +4,24 @@ import shutil
 import subprocess
 import sys
 
-if not os.path.isfile("paths.json.user"):
-    shutil.copyfile("paths.json", "paths.json.user")
+cwd    = os.path.abspath(os.getcwd())
+mypath = os.path.dirname(os.path.realpath(__file__))
+jsontp = os.path.join(mypath, "paths.json")
+jsonwk = os.path.join(mypath, "paths.json.user")
+
+if not os.path.isfile(jsonwk):
+    shutil.copyfile(jsontp, jsonwk)
 
 justprint = len(sys.argv) > 1 and sys.argv[1] == "print"
 
 if (justprint):
     print("Print mode only.")
 
-paths   = json.loads("".join([x.strip() for x in open("paths.json").readlines()]))
+paths   = json.loads("".join([x.strip() for x in open(jsonwk).readlines()]))
 RS_path = paths["rosetta"]["path"]
 RS_vers = paths["rosetta"]["version"]
-cwd     = os.path.abspath(os.getcwd())
 
+os.chdir(os.path.abspath(mypath))
 with open("run_test.log", "w") as fo:
     for testpath in paths["tests"]:
         folder = os.path.abspath(testpath.keys()[0])
@@ -31,5 +36,6 @@ with open("run_test.log", "w") as fo:
                     fo.write("OK!: test {0}.{1} finished without crashing\n".format(folder, test))
             except OSError:
                 fo.write("KO!: test {0}.{1} crashed somewhere\n".format(folder, test))
-        print("cd {0}".format(os.path.abspath(cwd)))
-        os.chdir(os.path.abspath(cwd))
+        print("cd {0}".format(os.path.abspath(mypath)))
+        os.chdir(os.path.abspath(mypath))
+os.chdir(os.path.abspath(cwd))

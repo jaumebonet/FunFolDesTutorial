@@ -1,78 +1,111 @@
 <ROSETTASCRIPTS>
 
   <SCOREFXNS>
-    # Centroid-level score function is used to score after NubInitio and in case chainbreak closure is needed.
-    <ScoreFunction name="centroid" weights="cen_std" patch="score4L" />
-    # Full Atom-level score function is used to repack disulfides in NubInitio and guide FastDesign.
+    # Full Atom-level score function is used to repack disulfides in NubInitio
+    # and guide FastDesign.
     <ScoreFunction name="fullatom" weights="talaris2014" />
   </SCOREFXNS>
 
   <RESIDUE_SELECTORS>
-    <xi:include href="xml_pieces/selectors.xml" />    # Standard FFL ResidueSelectors.
-    # Template Scaffold Selectors.
-    <Index name="insertion" resnums="65A-86A" />      # Placement of the motif (region we remove).
-    <Chain name="chA" chains="A" />                   # Template Chain (there can only be one!).
-    <Not name="!chA" selector="chA" />
-    # Target Motif Selectors.
-    <Index name="query_motif" resnums="255P-276P" />  # Functional Motif of interest.
-    <Chain name="chP" chains="P" />                   # As the design keeps the motifs chain,
-                                                      # this is the design's chain.
+    # Standard FFL ResidueSelectors.
+    <xi:include href="xml_pieces/selectors.xml" />
+
+    # TEMPLATE POSE:
+    #   The one that will be used as guide to refold the protein.
+    #   One needs to define the region from that protein that will be
+    #   substituted by the MOTIF of interes. We call that region INSERTION.
+    <Index name="insertion"  resnums="65A-86A" />
+    <Not   name="!insertion" selector="insertion" />
+
+    #   The template pose can only contain ONE SINGLE CHAIN. This is needed
+    #   both for StructFragmentMover and NubInitioMover. This is due to the
+    #   fact that fragment creation and usage in the ab initio protocol will
+    #   generate unexpected behaviours when called upon multiple chains.
+    <Chain name="templateChain"  chains="A" />
+    <Not   name="!templateChain" selector="templateChain" />
+
+    # MOTIF POSE:
+    #   We need to select the residues from the motif pose that we actually
+    #   consider our QUERY MOTIF.
+    <Index name="query_motif" resnums="255P-276P" />
+
+    #   The design will keep the same chain name as the one of the query motif.
+    #   This is done so that, if binders are also added, the chain naming will
+    #   not overlap and also that it will be consistent with the source PDB.
+    <Chain name="designChain" chains="P" />
   </RESIDUE_SELECTORS>
 
   <MOVE_MAP_FACTORIES>
-    <xi:include href="xml_pieces/movemap.xml" />      # Standard FFL MoveMap
+    # Standard FFL MoveMap
+    <xi:include href="xml_pieces/movemap.xml" />
   </MOVE_MAP_FACTORIES>
 
   <TASKOPERATIONS>
-    <xi:include href="xml_pieces/taskoperators.xml" /># Standard FFL TaskOperators
+    # Standard FFL TaskOperators
+    <xi:include href="xml_pieces/taskoperators.xml" />
   </TASKOPERATIONS>
 
   <FILTERS>
+    # We will check the RMSD between the pose after NubInitioMover and at the end.
+    <RmsdFromResidueSelectorFilter name="rmsd_drift" reference_name="refolded_pose"
+      reference_selector="designChain" query_selector="designChain" confidence="0" />
     # We will check at the end the final RMSD between the template and the Design
-    <RmsdFromResidueSelectorFilter name="final_rmsd" confidence="0"
-        reference_name="template_pose" reference_selector="chA"
-        query_selector="chP" />
+    <RmsdFromResidueSelectorFilter name="final_rmsd" reference_name="template_pose"
+      reference_selector="templateChain" query_selector="designChain" confidence="0" />
   </FILTERS>
 
   <MOVERS>
-    # We will save the template so we can, at the end, see how far from it our desing went
+    # EXTRA POSES TO SAVE/LOAD:
+    #   We will SAVE the TEMPLATE (input pose) to measure the FINAL RMSD of the design.
     <SavePoseMover name="saveTemplate" restore_pose="0" reference_name="template_pose" />
-    # Both to create the fragments needed for NubInitio as well as for the NubInitio itself,
-    # only one-chain templates can be considered, so we'll need to delete the rest.
-    <DeleteRegionMover name="removeExtraChains" residue_selector="!chA" />
-    # This is one of the alternatives to load the target motif's pdb file.
-    <SavePoseMover name="load_target" reference_name="target_pose" pdb_file="3ixt.pdb.gz" />
+    #   We will SAVE the REFOLDED POSE before the design process to evaluate the RMSD
+    #   DRIFT between it and the final design.
+    <SavePoseMover name="saveRefolded" restore_pose="0" reference_name="refolded_pose" />
+    #   We will LOAD in parallel the MOTIF POSE from which the MOTIF (and BINDER, if any)
+    #   will be obtained. Loading a PDB FILE into the DataMap does not require for this
+    #   mover to be called in the PROTOCOL (actually, it should NOT be called).
+    <SavePoseMover name="loadTarget" reference_name="target_pose" pdb_file="3ixt.pdb.gz" />
+
+    # The TEMPLATE pose MUST BE A SINGLE, UNBROKEN CHAIN. This is non-negotiable.
+    # Extra chains need to be deleted BEFORE starting to create FRAGMENTS.
+    <DeleteRegionMover name="removeExtraChains" residue_selector="!templateChain" />
+
+    # FRAGMENT CREATION/LOADING:
     # The creates the fragments (if they need to be created) or loads them from a file
     # into the DataMap with the "frags" identifier (that needs to be specified in the NubInitio).
-    <StructFragmentMover name="FragmentPicker" prefix="frags"
-      vall_file="database/vall.jul19.2011.gz" output_frag_files="1"
-      small_frag_file="frags.200.3mers" large_frag_file="frags.200.9mers"
-    />
-    # Constraints have to be used to guide the ab initio folding.
+    <StructFragmentMover name="FragmentPicker" prefix="frags" vall_file="database/vall.jul19.2011.gz"
+       output_frag_files="1" small_frag_file="frags.200.3mers" large_frag_file="frags.200.9mers" />
+
+    # Guiding the ab inito with CONSTRAINTS highly improves the results from NubInitioMover.
     <AddConstraints name="addCST" >
-      <AtomPairConstraintGenerator name="atompairCST" sd="3.0" ca_only="true"
-        use_harmonic="true" unweighted="true" min_seq_sep="6" max_distance="40" residue_selector="chA"
-      />
+      <AtomPairConstraintGenerator name="atompairCST" sd="3.0" ca_only="true" min_seq_sep="6"
+        use_harmonic="true" unweighted="true" max_distance="40" residue_selector="templateChain" />
     </AddConstraints>
+
     # After folding, we will remove the constraints so that the design process is not guided by
-    # constraints that do not belong anymore to our design (they come from the original scaffold)
+    # constraints that do not belong anymore to our design (they come from the original scaffold).
     <ClearConstraintsMover name="cleanCST" />
-    # The NubInitio folding is done here.
-    <NubInitioMover name="FFL" fragments_id="frags" template_motif_selector="insertion" use_cst="true"
-      clear_motif_cst="true" rmsd_threshold="5" fullatom_scorefxn="fullatom" >
+
+    # INSERTION AND REFOLDING
+    #   For demonstrative purposes, some residues in the MOTIF are allowed to mutate.
+    <NubInitioMover name="FFL" fragments_id="frags" template_motif_selector="insertion" fullatom_scorefxn="fullatom" >
       <Nub reference_name="target_pose" residue_selector="query_motif" >
         <Segment order="1" n_term_flex="2" c_term_flex="2" editable="3,5,7,9" />
       </Nub>
     </NubInitioMover>
-    # This is good to have to see a schema of what residues are going to be affected in which way
+
+    # This mover is very helpful in terms of showing the setup of the pose after the
+    # NubInitioMover has been run.
     <DisplayPoseLabelsMover name="showDesign" />
-    # Edit the sequence to stabilize the protein
-    <FastDesign name="DesignRelax" scorefxn="fullatom"
-               task_operations="FFLMOTIF_TASKOP,FFLTEMPLATE_TASKOP"
-               repeats="3" delete_virtual_residues_after_FastRelax="true"
-               movemap_factory="FFLSTANDARD_MOVEMAP" >
+
+    # SEQUENCE EDITING
+    <FastDesign name="DesignRelax" scorefxn="fullatom" repeats="3"
+      task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP"
+      delete_virtual_residues_after_FastRelax="true"
+      movemap_factory="FFLSTANDARD_MOVEMAP" >
     </FastDesign>
 
+    # This might be helpful in order to latter on analyse the designs in PyMOL
     <ResidueLabelsToPymolSelectionMover name="pymolselect" pdb_count="true" />
   </MOVERS>
 
@@ -81,17 +114,19 @@
 
   <PROTOCOLS>
     # Preparing Template
-    <Add mover="saveTemplate" />
     <Add mover="removeExtraChains" />
+    <Add mover="saveTemplate" />
     <Add mover="FragmentPicker" />
     <Add mover="addCST" />
     # Fold
     <Add mover="FFL" />
+    <Add mover="saveRefolded" />
     <Add mover="showDesign" />
     # Design
     <Add mover="cleanCST" />
     <Add mover="DesignRelax" />
     # Evaluate
+    <Add filter="rmsd_drift" />
     <Add filter="final_rmsd" />
     <Add mover="pymolselect" />
   </PROTOCOLS>

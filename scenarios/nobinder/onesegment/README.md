@@ -7,7 +7,7 @@ Each example has its own __XML__ file. It is recommended to run an sdiff between
 sdiff simple_run.xml bigger_run.xml
 sdiff simple_run.xml smaller_run.xml
 ```   
-Be aware that this scripts, as they are here, will provide _two_ __RMSD__ values: one just after the __NubInitioMover__ has finalized folding (this is used for the internal filter of the mover) and another at the end of the design process.   
+Be aware that this scripts, as they are here, will provide _three_ __RMSD__ values: one just after the __NubInitioMover__ has finalized folding (this is used for the internal filter of the mover), another at the end of the design process that describes how much the final design matches with the starting template and a third one that describes the difference (drift) between the structure just after __NubInitioMover__ and the final design.   
 
 ## Same Size insertion (simple_run)
 
@@ -59,7 +59,7 @@ PDB file name: 3ixt.pdb.gz
 ```
 The general parameters are the same as with the previous case, but the piece extracted from the template is smaller than the inserted motif, thus resulting in a longer protein. The thing here is that, from the insertion on, the constraints have been remapped to still connect the expected residues.
 
-Key difference between the script for this model (```biger_run.xml```) and the regular one (```simple_run.xml```) is the correct definition of the used template (selector ```<And name="chA!insert" selectors="chA,!insertion" />```) so that the right part is used to evaluate the final __RMSD__ (thus, is not key for the protocol but to obtain reliable filtering values).
+Key difference between the script for this model (```biger_run.xml```) and the regular one (```simple_run.xml```) is the correct definition of the used template (selector ```<And name="templateChain!insert" selectors="templateChain,!insertion" />```) so that the right part is used to evaluate the final __RMSD__ (thus, is not key for the protocol but to obtain reliable filtering values).
 
 ## Smaller Size insertion (smaller_run)
 
@@ -83,4 +83,4 @@ PDB file name: 3ixt.pdb.gz
 0001 -- 0092    P 0001  -- 0092  |   0092 residues;    01577 atoms
                            TOTAL |   0092 residues;    01577 atoms
 ```
-In this case, a part from modifications similar to those in ```bigger_run.xml```, the script ```smaller_run.xml``` also _cuts in the N-terminus_ of the protein to obtain a more compact design without a trailing alpha appearing over the target motif. This is done by defining the template chain not with a template selector like in previous cases but with an Index selector: ```<Index name="chA" resnums="10A-115A" />```. Because of that change in size of the template itself, new fragment files to guide the _ab initio_ had to be generated.
+In this case, a part from modifications similar to those in ```bigger_run.xml```, the script ```smaller_run.xml``` also _cuts in the N-terminus_ of the protein to obtain a more compact design without a trailing alpha appearing over the target motif. This is done by defining the template chain not with a template selector like in previous cases but with an Index selector: ```<Index name="templateChain" resnums="10A-115A" />```. Because of that change in size of the template itself, new fragment files to guide the _ab initio_ had to be generated.

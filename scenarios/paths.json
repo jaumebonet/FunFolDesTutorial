@@ -21,7 +21,7 @@
       {
         "binder/onesegment":
         [
-          "simple_run"
+          "simple_run", "bigger_run", "smaller_run"
         ]
       },
       {
