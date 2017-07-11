@@ -21,12 +21,13 @@ To find a example that fits a particular type of problem, you can follow this ta
 
 Different scenarios can be presented in each example type.
 
-### Database Requirements
+### Database Requirements
 
 The __NubInitioMover__, that is the basis of the _FFL protocol_, relies on _ab initio_. Thus, in order to run it, fragments for the template protein must be created. Fragment files have been already created for the examples contained here, but if one would make its own runs with new templates, the _vall database_ is needed.  
 The database can be build following the description in the [database folder](database).
 
-### Running all the scenarios  
+### Running all the scenarios
+
 All scenarios can be automatically run one after the other __(nstruct=2)__, by calling the python script:
 ```
 python scenarios/run_test.py
