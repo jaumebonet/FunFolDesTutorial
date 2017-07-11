@@ -1,0 +1,43 @@
+<ROSETTASCRIPTS>
+
+  <SCOREFXNS>
+    <ScoreFunction name="fullatom" weights="talaris2014" />
+  </SCOREFXNS>
+
+  <RESIDUE_SELECTORS>
+    <xi:include href="selectors.xml" />
+  </RESIDUE_SELECTORS>
+
+  <FILTERS> # (confidence=0 -> to score not to filter)
+    # Check global (helix) RMSD
+    <RmsdFromResidueSelectorFilter name="GlobalHRMSD"
+      reference_name="template_pose" reference_selector="target_alphas" query_selector="target_alphas" confidence="1" />
+
+    # Local (helix) RMSD
+    <RmsdFromResidueSelectorFilter name="LocalHRMSD" superimpose="false"
+      reference_name="template_pose" reference_selector="target_alphas" query_selector="target_alphas" confidence="1" />
+  </FILTERS>
+
+  <MOVERS>
+    # The "template" is the one pose from the assemble that we are not piping as input
+    <SavePoseMover name="load_template" reference_name="template_pose" pdb_file="%%template%%" />
+
+    # Local Alignment for RMSD 1
+    <AlignByResidueSelectorMover name="align1" reference_name="template_pose"
+      reference_selector="target_ali_1" query_selector="target_ali_1" />
+    # Local Alignment for RMSD 2
+    <AlignByResidueSelectorMover name="align2" reference_name="template_pose"
+      reference_selector="target_ali_2" query_selector="target_ali_2" />
+    # Local Alignment for RMSD 3
+    <AlignByResidueSelectorMover name="align3" reference_name="template_pose"
+      reference_selector="target_ali_3" query_selector="target_ali_3" />
+  </MOVERS>
+
+  <PROTOCOLS>
+    # Global First
+    <Add filter="GlobalHRMSD" />
+    # Loop align-eval
+    <Add mover="%%align%%" />
+    <Add filter="LocalHRMSD" />
+  </PROTOCOLS>
+</ROSETTASCRIPTS>

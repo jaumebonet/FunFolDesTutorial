@@ -2,12 +2,17 @@ score.sc
 *_pose.pdb
 *.rslog
 *.sc
-*_tutorial_silent
+*_silent
+tracer*
+*.out
+*.err
 
+.ipynb_checkpoints/
 database/vall.jul19.2011.gz
 
 scenarios/run_test.log
+
 scenarios/paths.json.user
 scenarios/*/*_000?.pdb
-
-benchmark/binder/binderbench_*
+benchmark/score_weights/binder/binderbench_*
+benchmark/score_weights/constraint/constraintbench_*

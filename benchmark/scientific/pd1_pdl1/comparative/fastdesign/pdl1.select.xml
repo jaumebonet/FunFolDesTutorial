@@ -1,0 +1,20 @@
+# Design And Template chain is A (PDL1)
+<Chain name="designChain" chains="A" />
+<Not name="!designChain"  selector="designChain" />
+
+# Template Scaffold AND Motif Selectors (insertion over itself)
+<Index name="motif1" resnums="54A-58A" />
+<Index name="motif2" resnums="62A-68A" />
+<Index name="motif3" resnums="112A-115A" />
+<Index name="motif4" resnums="123A-126A" />
+<Or name="insertion"   selectors="motif1,motif2,motif3,motif4" />
+<Not name="!insertion" selector="insertion" />
+# Binder Chain is B (PD1)
+<Chain name="binderChain" chains="B" />
+<Not name="!binderChain"  selector="binderChain" />
+<And name="template"      selectors="!insertion,!binderChain" />
+
+# First is False, Second == MOTIF selector
+# We define them to limit the changes in the bigger script
+<And name="coldAffinity"  selectors="MOTIF,TEMPLATE" />
+<And name="placedhot"     selectors="MOTIF,MOTIF" />

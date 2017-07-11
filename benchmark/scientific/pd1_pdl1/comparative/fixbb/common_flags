@@ -1,0 +1,7 @@
+-overwrite
+-in:ignore_unrecognized_res
+-in:ignore_waters
+-out:file:silent_struct_type binary
+
+-packing:ex1
+-packing:ex2

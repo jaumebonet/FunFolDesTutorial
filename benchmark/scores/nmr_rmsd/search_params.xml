@@ -1,0 +1,66 @@
+<orgPdbCompositeQuery version="1.0">
+    <resultCount>9805</resultCount>
+    <queryId>739892C6</queryId>
+ <queryRefinement>
+  <queryRefinementLevel>0</queryRefinementLevel>
+  <orgPdbQuery>
+    <version>head</version>
+    <queryType>org.pdb.query.simple.SecondaryStructureQuery</queryType>
+    <description>Secondary structure has:  70 or more percent of elements are Alpha Helical  and 10 or less percent of elements are Beta Sheet </description>
+    <queryId>null</queryId>
+    <resultCount>9805</resultCount>
+    <runtimeStart>2017-07-07T09:33:08Z</runtimeStart>
+    <runtimeMilliseconds>1115</runtimeMilliseconds>
+    <polyStats.helixPercent.comparator>between</polyStats.helixPercent.comparator>
+    <polyStats.helixCount.comparator>between</polyStats.helixCount.comparator>
+    <polyStats.sheetPercent.comparator>between</polyStats.sheetPercent.comparator>
+    <polyStats.sheetCount.comparator>between</polyStats.sheetCount.comparator>
+    <polyStats.helixPercent.min>70</polyStats.helixPercent.min>
+    <polyStats.sheetPercent.max>10</polyStats.sheetPercent.max>
+  </orgPdbQuery>
+ </queryRefinement>
+ <queryRefinement>
+  <queryRefinementLevel>1</queryRefinementLevel>
+  <conjunctionType>and</conjunctionType>
+  <orgPdbQuery>
+    <version>head</version>
+    <queryType>org.pdb.query.simple.ExpTypeQuery</queryType>
+    <description>Experimental Method is SOLUTION NMR</description>
+    <queryId>null</queryId>
+    <resultCount>11827</resultCount>
+    <runtimeStart>2017-07-07T09:33:09Z</runtimeStart>
+    <runtimeMilliseconds>239</runtimeMilliseconds>
+    <mvStructure.expMethod.value>SOLUTION NMR</mvStructure.expMethod.value>
+  </orgPdbQuery>
+ </queryRefinement>
+ <queryRefinement>
+  <queryRefinementLevel>2</queryRefinementLevel>
+  <conjunctionType>and</conjunctionType>
+  <orgPdbQuery>
+    <version>head</version>
+    <queryType>org.pdb.query.simple.TreeQueryExpression</queryType>
+    <description>SCOP is All alpha proteins</description>
+    <queryId>null</queryId>
+    <resultCount>7519</resultCount>
+    <runtimeStart>2017-07-07T09:33:09Z</runtimeStart>
+    <runtimeMilliseconds>82</runtimeMilliseconds>
+    <t>11</t>
+    <n>+46456~</n>
+    <nodeDesc>All alpha proteins</nodeDesc>
+  </orgPdbQuery>
+ </queryRefinement>
+ <queryRefinement>
+  <queryRefinementLevel>3</queryRefinementLevel>
+  <conjunctionType>and</conjunctionType>
+  <orgPdbQuery>
+    <version>head</version>
+    <queryType>org.pdb.query.simple.StoichiometryQuery</queryType>
+    <description>Stoichiometry in biological assembly: Stoichiometry is HETEROMER</description>
+    <queryId>null</queryId>
+    <resultCount>16531</resultCount>
+    <runtimeStart>2017-07-07T09:33:09Z</runtimeStart>
+    <runtimeMilliseconds>444</runtimeMilliseconds>
+    <stoichiometry>HETEROMER</stoichiometry>
+  </orgPdbQuery>
+ </queryRefinement>
+</orgPdbCompositeQuery>

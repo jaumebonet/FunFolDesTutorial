@@ -1,0 +1,144 @@
+<ROSETTASCRIPTS>
+
+  <SCOREFXNS>
+
+    # A weight is added to small-range hbonds to favor helix
+    # aa_composition is used to favor the correct type of residues
+    # in helical residues (requires AddHelixSequenceConstraints).
+    <ScoreFunction name="fullatom" weights="talaris2014">
+      <Reweight scoretype="hbond_sr_bb"    weight="1.6"/>
+      <Reweight scoretype="aa_composition" weight="1.0" />
+    </ScoreFunction>
+
+  </SCOREFXNS>
+
+  <RESIDUE_SELECTORS>
+    # Standard FFL ResidueSelectors.
+    <xi:include href="xml_pieces/selectors.xml" />
+
+    # Template: 3lhp.pdb.gz: Engineered protein.
+    <Index name="insertion" resnums="49S-70S" />
+    <Chain name="chS"       chains="S" />
+    <Not   name="!chS"      selector="chS" />
+
+    # Motif: pdbs/2wh6.pdb.gz: BCL-2-LIKE PROTEIN 11: BH3
+    <Index name="query_motif" resnums="51B-72B" />
+    <Chain name="chB"         chains="B" />
+
+    # Target: pdbs/4oyd.pdb.gz: COMPUTATIONALLY DESIGNED INHIBITOR
+    # We need this to compare the RMSD of our design with it, as we are
+    # expecting our design to get closer to this.
+    # We cannot use a chain selector as this crystal is 2 residues longer,
+    # so we have to take them out (from the C-term).
+    <Index name="target_region" resnums="1B-116B" />
+
+    # Alignment selector can be applied to both the final design and the target.
+    # This is required to do a non-global alignemnt RMSD.
+    # This selector means that we are aligning through the inserted motif wihtout
+    # the flexible regions assigned to it.
+    <Index name="target_alignment" resnums="49B-61B" />
+
+    # When comparing with the target structure, we can do it for all the structure
+    # or just for those residues that should be alpha helix (there is no garantee
+    # they will be so in the designs, though).
+    <Index name="target_h1"  resnums="2B-33B" />
+    <Index name="target_h2"  resnums="39B-75B" />
+    <Index name="target_h3"  resnums="82B-115B" />
+    <Or name="target_alphas" selectors="target_h1,target_h2,target_h3" />
+
+  </RESIDUE_SELECTORS>
+
+  <MOVE_MAP_FACTORIES>
+    # Standard FFL MoveMap
+    <xi:include href="xml_pieces/movemap.xml" />
+  </MOVE_MAP_FACTORIES>
+
+  <TASKOPERATIONS>
+    # Standard FFL TaskOperators
+    <xi:include href="xml_pieces/taskoperators.xml" />
+  </TASKOPERATIONS>
+
+  <FILTERS> # (confidence=0 -> to score not to filter)
+    # Check global RMSD against the source Template
+    <RmsdFromResidueSelectorFilter name="GRMSD2Template"
+      reference_name="template_pose" reference_selector="chS" query_selector="chB" confidence="0" />
+    # Check global RMSD against the target PDB (4OYD.pdb)
+    <RmsdFromResidueSelectorFilter name="GRMSD2Target"
+      reference_name="target_pose" reference_selector="target_region" query_selector="chB" confidence="0" />
+    # Check RMSD against the target PDB (4OYD.pdb) aligned through the inserted region
+    # Needs to be preceded by an alignment through the region of interest
+    <RmsdFromResidueSelectorFilter name="LRMSD2Target"  superimpose="false"
+      reference_name="target_pose" reference_selector="target_region" query_selector="chB" confidence="0" />
+    # Check RMSD against the target PDB (4OYD.pdb) aligned through the inserted region only for alhpa helices
+    # Needs to be preceded by an alignment through the region of interest
+    <RmsdFromResidueSelectorFilter name="LHRMSD2Target"  superimpose="false"
+      reference_name="target_pose" reference_selector="target_alphas" query_selector="target_alphas" confidence="0" />
+  </FILTERS>
+
+  <MOVERS>
+    # We work with 3 PDBs here:
+    # 3lhp.pdb.gz is the PDB that contains the template that we will use. It will be loaded
+    #             through -s flag but also here as a reference pose: template_pose
+    # 2wh6.pdb.gz is the PDB that contains the motif of interest and its binder. Here it is
+    #             loaded as the motif_pose
+    # 4oyd.pdb.gz is the PDB that constains the design that we aim to mimic. Here it is loaded
+    #             as the target_pose
+    # ** SavePoseMover used like this does not need to be called during PROTOCOL to work.
+    <SavePoseMover name="load_template" reference_name="template_pose" pdb_file="pdbs/3lhp.pdb.gz" />
+    <SavePoseMover name="load_motif"    reference_name="motif_pose"    pdb_file="pdbs/2wh6.pdb.gz" />
+    <SavePoseMover name="load_target"   reference_name="target_pose"   pdb_file="pdbs/4oyd.pdb.gz" />
+
+    # 3lhp has other chains than the one we need (S). We must delete them.
+    <DeleteRegionMover name="removeExtraChains" residue_selector="!chS" />
+
+    # The creates the fragments (if they need to be created) or loads them from a file
+    # into the DataMap with the "frags" identifier (that needs to be specified in the NubInitio).
+    <StructFragmentMover name="FragmentPicker" prefix="frags"
+      vall_file="database/vall.jul19.2011.gz" output_frag_files="1"
+      small_frag_file="frags.200.3mers" large_frag_file="frags.200.9mers"
+    />
+
+    # The NubInitio folding is done here.
+    <NubInitioMover name="FFL" fragments_id="frags" template_motif_selector="insertion" use_cst="false"
+      rmsd_threshold="5" fullatom_scorefxn="fullatom" >
+      <Nub reference_name="motif_pose" residue_selector="query_motif" >
+        <Segment order="1" n_term_flex="2" c_term_flex="2" />
+      </Nub>
+    </NubInitioMover>
+    # This is good to have to see a schema of what residues are going to be affected in which way
+    <DisplayPoseLabelsMover name="showDesign" />
+
+    # For an helix bundle, this should be usefull
+    <AddHelixSequenceConstraints name="addHComp" />
+    # Edit the sequence to stabilize the protein
+    <FastDesign name="DesignRelax" scorefxn="fullatom" clear_designable_residues="true"
+               task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP"
+               repeats="3" delete_virtual_residues_after_FastRelax="true"
+               movemap_factory="FFLSTANDARD_MOVEMAP" >
+    </FastDesign>
+
+    # Local alignment for final evaluation
+    <AlignByResidueSelectorMover name="align" reference_name="target_pose"
+      reference_selector="target_alignment" query_selector="target_alignment" />
+
+  </MOVERS>
+
+  <PROTOCOLS>
+    # Preparing Template
+    <Add mover="removeExtraChains" />
+    <Add mover="FragmentPicker" />
+    # Fold
+    <Add mover="FFL" />
+    <Add mover="showDesign" />
+    # Design
+    <Add mover="addHComp" />
+    <Add mover="DesignRelax" />
+    # Evaluate
+    <Add filter="GRMSD2Template" />
+    <Add filter="GRMSD2Target" />
+    <Add mover="align" />
+    <Add filter="LRMSD2Target" />
+    <Add filter="LHRMSD2Target" />
+  </PROTOCOLS>
+
+</ROSETTASCRIPTS>

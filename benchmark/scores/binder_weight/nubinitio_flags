@@ -1,0 +1,12 @@
+-parser:protocol nubinitio.xml
+-s pdbs/4zqk3_0001.pdb
+
+-out:nstruct 20
+
+-overwrite
+-in:ignore_unrecognized_res
+-in:ignore_waters
+-out:file:silent_struct_type binary
+
+-out:mute protocols.abinitio
+
