@@ -9,6 +9,10 @@ tracer*
 
 .ipynb_checkpoints/
 database/vall.jul19.2011.gz
+
 scenarios/run_test.log
+
+scenarios/paths.json.user
+scenarios/*/*_000?.pdb
 benchmark/score_weights/binder/binderbench_*
-benchmark/score_weights/constraints/constraintbench_*
+benchmark/score_weights/constraint/constraintbench_*

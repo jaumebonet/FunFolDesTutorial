@@ -54,13 +54,18 @@
         use_harmonic="true" unweighted="true" min_seq_sep="6" max_distance="40" residue_selector="chA"
       />
     </AddConstraints>
+    # After folding, we will remove the constraints so that the design process is not guided by
+    # constraints that do not belong anymore to our design (they come from the original scaffold)
+    <ClearConstraintsMover name="cleanCST" />
     # The NubInitio folding is done here.
     <NubInitioMover name="FFL" fragments_id="frags" template_motif_selector="insertion" use_cst="true"
-      clear_motif_cst="true" rmsd_threshold="5" centroid_scorefxn="centroid" fullatom_scorefxn="fullatom" >
+      clear_motif_cst="true" rmsd_threshold="5" fullatom_scorefxn="fullatom" >
       <Nub reference_name="target_pose" residue_selector="query_motif" >
         <Segment order="1" n_term_flex="2" c_term_flex="2" editable="3,5,7,9" />
       </Nub>
     </NubInitioMover>
+    # This is good to have to see a schema of what residues are going to be affected in which way
+    <DisplayPoseLabelsMover name="showDesign" />
     # Edit the sequence to stabilize the protein
     <FastDesign name="DesignRelax" scorefxn="fullatom"
                task_operations="FFLMOTIF_TASKOP,FFLTEMPLATE_TASKOP"
@@ -82,7 +87,9 @@
     <Add mover="addCST" />
     # Fold
     <Add mover="FFL" />
+    <Add mover="showDesign" />
     # Design
+    <Add mover="cleanCST" />
     <Add mover="DesignRelax" />
     # Evaluate
     <Add filter="final_rmsd" />
