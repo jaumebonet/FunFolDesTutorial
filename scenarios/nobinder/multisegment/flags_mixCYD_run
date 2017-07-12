@@ -3,7 +3,7 @@
 
 -out:prefix mixCYD_
 -out:file:silent mixCYD_tutorial_silent
--out:nstruct 1
+-out:nstruct 2
 
 -overwrite
 -in:ignore_unrecognized_res
