@@ -65,6 +65,13 @@
   <TASKOPERATIONS>
     # Standard FFL TaskOperators
     <xi:include href="xml_pieces/taskoperators.xml" />
+
+    <OperateOnResidueSubset name="NOEDIT_TASKOP" selector="HOTSPOT_OR_CONTEXT_AND_!FLEXIBLE" >
+      <RestrictToRepackingRLT/>
+    </OperateOnResidueSubset>
+    <OperateOnResidueSubset name="NOCYS_TASKOP" selector="COLDSPOT_OR_TEMPLATE" >
+      <DisallowIfNonnativeRLT disallow_aas="C" />
+    </OperateOnResidueSubset>
   </TASKOPERATIONS>
 
   <FILTERS> # (confidence=0 -> to score not to filter)
@@ -87,8 +94,7 @@
     <RmsdFromResidueSelectorFilter name="LLHRMSD2Target"  superimpose="false"
       reference_name="target_pose" reference_selector="target_local_alphas" query_selector="target_local_alphas" confidence="0" />
     # Make sure to get an evaluation of the design alone
-    <ScorePoseSegmentFromResidueSelectorFilter name="design_score" confidence="0"
-            residue_selector="chB" scorefxn="fullatom" />
+    <ScorePoseSegmentFromResidueSelectorFilter name="design_score" confidence="0" residue_selector="chB" scorefxn="fullatom" />
   </FILTERS>
 
   <MOVERS>
@@ -131,17 +137,21 @@
         <Segment order="1" n_term_flex="2" c_term_flex="2" />
       </Nub>
     </NubInitioMover>
+
     # This is good to have to see a schema of what residues are going to be affected in which way
     <DisplayPoseLabelsMover name="showDesign" />
 
     # For an helix bundle, this should be usefull
     <AddHelixSequenceConstraints name="addHComp" />
+
     # Edit the sequence to stabilize the protein
-    <FastDesign name="DesignRelax" scorefxn="fullatom" clear_designable_residues="true"
-               task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP"
-               repeats="3" delete_virtual_residues_after_FastRelax="true"
-               movemap_factory="FFLSTANDARD_MOVEMAP" >
-    </FastDesign>
+    <PackRotamersMover name="Pack" scorefxn="fullatom" task_operations="NOEDIT_TASKOP,NOCYS_TASKOP" />
+    <MinMover name="Min" scorefxn="fullatom" chi="false" bb="true" jump="0" tolerance="0.005" />
+    <ParsedProtocol name="PackMin" >
+      <Add mover_name="Pack" />
+      <Add mover_name="Min" />
+    </ParsedProtocol>
+    <LoopOver name="PackMinLoop" mover_name"PackMin"  iterations="3" />
 
     # Local alignment for final evaluation
     <AlignByResidueSelectorMover name="align" reference_name="target_pose"
@@ -160,7 +170,7 @@
     # Design
     <Add mover="cleanCST" />
     <Add mover="addHComp" />
-    <Add mover="DesignRelax" />
+    <Add mover="PackMinLoop" />
     # Evaluate
     <Add filter="GRMSD2Template" />
     <Add filter="GRMSD2Target" />
