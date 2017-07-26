@@ -151,7 +151,7 @@
       <Add mover_name="Pack" />
       <Add mover_name="Min" />
     </ParsedProtocol>
-    <LoopOver name="PackMinLoop" mover_name"PackMin"  iterations="3" />
+    <LoopOver name="PackMinLoop" mover_name="PackMin"  iterations="3" />
 
     # Local alignment for final evaluation
     <AlignByResidueSelectorMover name="align" reference_name="target_pose"
