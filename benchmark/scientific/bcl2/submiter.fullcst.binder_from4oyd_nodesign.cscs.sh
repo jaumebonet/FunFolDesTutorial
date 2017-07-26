@@ -2,12 +2,12 @@
 #SBATCH --ntasks=96
 #SBATCH --ntasks-per-node=12
 #SBATCH --cpus-per-task 1
-#SBATCH --time 12:00:00
+#SBATCH --time 05:00:00
 #SBATCH --partition=normal
 #SBATCH --constraint=gpu
 #SBATCH --job-name="bcl2_fullcst_binder_nodesign"
 #SBATCH --output=bcl2_fullcst_binder_nodesign_%A.out
-#SBATCH --error=bcl2_fullcst_binder_nnodesign_%A.err
+#SBATCH --error=bcl2_fullcst_binder_nodesign_%A.err
 
 module switch PrgEnv-cray PrgEnv-intel
 module load daint-gpu
