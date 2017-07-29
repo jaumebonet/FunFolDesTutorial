@@ -60,7 +60,7 @@
   <MOVE_MAP_FACTORIES>
     # Standard FFL MoveMap
     <xi:include href="xml_pieces/movemap.xml" />
-    <MoveMapFactory name="FULL_MOVEMAP" bb="true" chi="true" nu="true" branches="false" jumps="false" >
+    <MoveMapFactory name="FULL_MOVEMAP" bb="true" chi="true" nu="true" branches="false" jumps="false" />
   </MOVE_MAP_FACTORIES>
 
   <TASKOPERATIONS>

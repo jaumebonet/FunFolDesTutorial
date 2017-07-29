@@ -131,7 +131,6 @@
     <Add mover="addHComp" />
     <Add mover="DesignRelax" />
     # Evaluate
-    <Add filter="GRMSD2Template" />
     <Add filter="GRMSD2Target" />
     <Add mover="align" />
     <Add filter="LRMSD2Target" />
