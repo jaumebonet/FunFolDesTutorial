@@ -21,8 +21,9 @@
     <Not   name="!query_motif" selector="query_motif" />
     <Chain name="chB"          chains="B" />
     <Chain name="binder"       chains="A" />
+    <Or    name="wchains"      selectors="chB,binder" />
+    <Not   name="!wchains"     selector="wchains" />
     <And   name="template_chB" selectors="!query_motif,chB" />
-
 
     # Target: pdbs/4oyd.pdb.gz: COMPUTATIONALLY DESIGNED INHIBITOR
     # We need this to compare the RMSD of our design with it, as we are
@@ -96,6 +97,8 @@
   <MOVERS>
     # ** SavePoseMover used like this does not need to be called during PROTOCOL to work.
     <SavePoseMover name="load_target"   reference_name="target_pose"   pdb_file="pdbs/4oyd.pdb.gz" />
+    # Remove chains we don't need
+    <DeleteRegionMover name="removeExtraChains" residue_selector="!wchains" />
 
     # We mimick the FFL labeling so we can apply the same MoveMap and Design TaskOperations
     <LabelPoseFromResidueSelectorMover name="labelMOTIF"    property="MOTIF"    residue_selector="query_motif" />
@@ -104,7 +107,8 @@
     <LabelPoseFromResidueSelectorMover name="labelHOTSPOT"  property="HOTSPOT"  residue_selector="query_motif" />
 
     # This is good to have to see a schema of what residues are going to be affected in which way
-    <DisplayPoseLabelsMover name="showDesign" />
+    <DisplayPoseLabelsMover name="showDesign" movemap_factory="FULL_MOVEMAP"
+      task_operations="NOEDIT_TASKOP,NOCYS_TASKOP" />
 
     # For an helix bundle, this should be usefull
     <AddHelixSequenceConstraints name="addHComp" />
@@ -122,11 +126,13 @@
   </MOVERS>
 
   <PROTOCOLS>
+    <Add mover="removeExtraChains" />
     # Mimick FFL labeling
     <Add mover="labelMOTIF" />
     <Add mover="labelTEMPLATE" />
     <Add mover="labelCONTEXT" />
     <Add mover="labelHOTSPOT" />
+    <Add mover="showDesign" />
     # Design
     <Add mover="addHComp" />
     <Add mover="DesignRelax" />

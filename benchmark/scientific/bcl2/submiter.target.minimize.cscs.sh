@@ -1,9 +1,9 @@
 #!/bin/bash -l
-#SBATCH --ntasks=52
+#SBATCH --ntasks=27
 #SBATCH --ntasks-per-node=12
 #SBATCH --cpus-per-task 1
-#SBATCH --time 01:30:00
-#SBATCH --partition=normal
+#SBATCH --time 00:30:00
+#SBATCH --partition=debug
 #SBATCH --constraint=gpu
 #SBATCH --job-name="target_minimize"
 #SBATCH --output=target_minimize_%A.out
@@ -18,7 +18,7 @@ ROSETTAPATH="/scratch/snx3000/jbonet/bin/main/source/bin/"
 ROSETTADIST="mpi.linuxiccrelease"
 TARGET="bcl2"
 PDB="pdbs/4oyd.pdb.gz"
-NSTRUCT=50
+NSTRUCT=25
 EXPERIMENT="target"
 EXPCOMPLEMENT="minimize"
 JOBID=1
