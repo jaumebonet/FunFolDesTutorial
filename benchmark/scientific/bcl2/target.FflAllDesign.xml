@@ -76,11 +76,11 @@
   <FILTERS> # (confidence=0 -> to score not to filter)
     # Check global RMSD against starting Pose (4OYD.pdb)
     <RmsdFromResidueSelectorFilter name="GRMSD2Target"
-      reference_name="target_pose" reference_selector="target_region" query_selector="chB" confidence="0" />
+      reference_name="target_pose" reference_selector="target_region" query_selector="target_region" confidence="0" />
     # Check RMSD against starting Pose (4OYD.pdb) aligned through the inserted region
     # Needs to be preceded by an alignment through the region of interest
     <RmsdFromResidueSelectorFilter name="LRMSD2Target"  superimpose="false"
-      reference_name="target_pose" reference_selector="target_region" query_selector="chB" confidence="0" />
+      reference_name="target_pose" reference_selector="target_region" query_selector="target_region" confidence="0" />
     # Check RMSD against starting Pose (4OYD.pdb) aligned through the inserted region only for alhpa helices
     # Needs to be preceded by an alignment through the region of interest
     <RmsdFromResidueSelectorFilter name="LHRMSD2Target"  superimpose="false"

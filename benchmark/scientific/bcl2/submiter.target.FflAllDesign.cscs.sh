@@ -1,9 +1,9 @@
 #!/bin/bash -l
-#SBATCH --ntasks=27
+#SBATCH --ntasks=52
 #SBATCH --ntasks-per-node=12
 #SBATCH --cpus-per-task 1
-#SBATCH --time 00:30:00
-#SBATCH --partition=debug
+#SBATCH --time 05:30:00
+#SBATCH --partition=normal
 #SBATCH --constraint=gpu
 #SBATCH --job-name="target_FflAllDesign"
 #SBATCH --output=target_FflAllDesign_%A.out
@@ -18,7 +18,7 @@ ROSETTAPATH="/scratch/snx3000/jbonet/bin/main/source/bin/"
 ROSETTADIST="mpi.linuxiccrelease"
 TARGET="bcl2"
 PDB="pdbs/4oyd.pdb.gz"
-NSTRUCT=25
+NSTRUCT=50
 EXPERIMENT="target"
 EXPCOMPLEMENT="FflAllDesign"
 JOBID=1
