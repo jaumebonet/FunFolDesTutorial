@@ -95,7 +95,7 @@
 
     # INSERTION AND REFOLDING
     #   For demonstrative purposes, some residues in the MOTIF are allowed to mutate.
-    <NubInitioMover name="FFL" fragments_id="frags" template_motif_selector="insertion" fullatom_scorefxn="fullatom" >
+    <NubInitioMover name="FFL" fragments_id="frags" template_motif_selector="insertion" fullatom_scorefxn="fullatom" dump_centroid="true" >
       <Nub reference_name="target_pose" residue_selector="query_motif" binder_selector="antibody" >
         <Segment order="1" n_term_flex="2" c_term_flex="2" editable="3,5,7,9" />
       </Nub>
@@ -103,7 +103,8 @@
 
     # This mover is very helpful in terms of showing the setup of the pose after the
     # NubInitioMover has been run.
-    <DisplayPoseLabelsMover name="showDesign" />
+    <DisplayPoseLabelsMover name="showDesign" movemap_factory="FFLSTANDARD_MOVEMAP"
+      task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP" />
 
     # SEQUENCE EDITING
     <FastDesign name="DesignRelax" scorefxn="fullatom" repeats="3"
