@@ -14,7 +14,7 @@ ROSETTADIST="linuxiccrelease"
 EXPCOMPLEMENT="nobinder"
 JOBID=1
 NSTRUCT=10
-ROUND=printf "%04d" ${SLURM_ARRAY_TASK_ID}
+ROUND=${SLURM_ARRAY_TASK_ID}
 
 TARGET="as4oyd"
 DDG="evaluate_ddg"
