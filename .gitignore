@@ -7,6 +7,8 @@ tracer*
 *.out
 *.err
 
+.DS_Store
+
 .ipynb_checkpoints/
 database/vall.jul19.2011.gz
 
