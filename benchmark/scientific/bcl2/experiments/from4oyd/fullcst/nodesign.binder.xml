@@ -1,0 +1,85 @@
+<ROSETTASCRIPTS>
+
+  <SCOREFXNS>
+
+    #A weight is added to small-range hbonds to favor helix
+    <ScoreFunction name="fullatom" weights="talaris2014">
+      <Reweight scoretype="hbond_sr_bb"    weight="1.6"/>
+    </ScoreFunction>
+
+  </SCOREFXNS>
+
+  <RESIDUE_SELECTORS>
+    # Standard FFL ResidueSelectors.
+    <xi:include href="../../../xml_pieces/selectors.xml" />
+
+    # Template: 3lhp.pdb.gz: Engineered protein.
+    <Index name="insertion"      resnums="49S-70S" />
+    <Chain name="templateChain"  chains="S" />
+    <Not   name="!templateChain" selector="templateChain" />
+
+    # Motif: pdbs/4oyd.pdb.gz: COMPUTATIONALLY DESIGNED INHIBITOR
+    <Index name="query_motif" resnums="43B-64B" />
+    <Chain name="designChain" chains="B" />
+    <Chain name="binder"      chains="A" />
+  </RESIDUE_SELECTORS>
+
+  <MOVE_MAP_FACTORIES>
+    # Standard FFL MoveMap
+    <xi:include href="../../../xml_pieces/movemap.xml" />
+  </MOVE_MAP_FACTORIES>
+
+  <TASKOPERATIONS>
+    # Standard FFL TaskOperators
+    <xi:include href="../../../xml_pieces/taskoperators.xml" />
+  </TASKOPERATIONS>
+
+  <MOVERS>
+    # We work with 3 PDBs here:
+    # 3lhp.pdb.gz is the PDB that contains the template that we will use. It will be loaded
+    #             through -s flag but also here as a reference pose: template_pose
+    # 4oyd.pdb.gz is the PDB that constains motif andthe design that we aim to mimic.
+    # ** SavePoseMover used like this does not need to be called during PROTOCOL to work.
+    <SavePoseMover name="load_template" reference_name="template_pose" pdb_file="../../../pdbs/3lhp.pdb.gz" />
+    <SavePoseMover name="load_motif"    reference_name="motif_pose"    pdb_file="../../../pdbs/4oyd.pdb.gz" />
+
+    # 3lhp has other chains than the one we need (S). We must delete them.
+    <DeleteRegionMover name="removeExtraChains" residue_selector="!templateChain" />
+
+    # The creates the fragments (if they need to be created) or loads them from a file
+    # into the DataMap with the "frags" identifier (that needs to be specified in the NubInitio).
+    <StructFragmentMover name="FragmentPicker" prefix="frags"
+      vall_file="../../../database/vall.jul19.2011.gz" output_frag_files="1"
+      small_frag_file="frags.200.3mers" large_frag_file="frags.200.9mers"
+    />
+
+    # Use distance atompairconstraints to guide the folding
+    <AddConstraints name="addCST" >
+      <AtomPairConstraintGenerator name="atompairCST" sd="2.0" ca_only="true"
+        use_harmonic="true" unweighted="true" min_seq_sep="6" max_distance="40" residue_selector="templateChain"
+      />
+    </AddConstraints>
+
+    # The NubInitio folding is done here.
+    <NubInitioMover name="FFL" fragments_id="frags" template_motif_selector="insertion" use_cst="true"
+      rmsd_threshold="5" fullatom_scorefxn="fullatom" >
+      <Nub reference_name="motif_pose" residue_selector="query_motif" binder_selector="binder" >
+        <Segment order="1" n_term_flex="2" c_term_flex="2" />
+      </Nub>
+    </NubInitioMover>
+    # This is good to have to see a schema of what residues are going to be affected in which way
+    <DisplayPoseLabelsMover name="showDesign" />
+
+  </MOVERS>
+
+  <PROTOCOLS>
+    # Preparing Template
+    <Add mover="removeExtraChains" />
+    <Add mover="FragmentPicker" />
+    # Fold
+    <Add mover="addCST" />
+    <Add mover="FFL" />
+    <Add mover="showDesign" />
+  </PROTOCOLS>
+
+</ROSETTASCRIPTS>
