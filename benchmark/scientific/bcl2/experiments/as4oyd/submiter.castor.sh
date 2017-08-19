@@ -28,5 +28,5 @@ SUFFIX=${EXPCOMPLEMENT}_${JOBID}_${ROUND}
 OUTDIR=$(echo ${EXPCOMPLEMENT})
 mkdir -p ${OUTDIR}
 srun ${ROSETTAPATH}rosetta_scripts.${ROSETTADIST} -parser:protocol ${TARGET}.${EXPCOMPLEMENT}.xml @common_flags -s ${PDB} -out:nstruct ${NSTRUCT} -out:prefix ${TARGET}_ -out:suffix _${SUFFIX} -out:file:silent ${OUTDIR}/${TARGET}_${SUFFIX}
-srun ${ROSETTAPATH}rosetta_scripts.${ROSETTADIST} -parser:protocol ${DDG}.${EXPCOMPLEMENT}.xml @common_flags -in:file:silent ${OUTDIR}/${TARGET}_${SUFFIX} -in:file:silent_struct_type binary -out:nstruct ${NSTRUCT} -out:file:silent ${OUTDIR}/${TARGET}_${SUFFIX}_${DDG}
+srun ${ROSETTAPATH}rosetta_scripts.${ROSETTADIST} -parser:protocol ${DDG}.${EXPCOMPLEMENT}.xml @common_flags -in:file:silent ${OUTDIR}/${TARGET}_${SUFFIX} -in:file:silent_struct_type binary -out:file:silent ${OUTDIR}/${TARGET}_${SUFFIX}_${DDG}
 echo "CASTOR: RUN FINISHED"
