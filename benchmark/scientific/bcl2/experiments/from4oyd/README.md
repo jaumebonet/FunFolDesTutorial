@@ -65,6 +65,7 @@ import matplotlib.pyplot as plt
 import rstoolbox
 import pandas as pd
 import seaborn as sns
+import numpy as np
 import copy
 
 sns.set(font_scale=1.5)
@@ -95,6 +96,7 @@ g = sns.lmplot(x="GRMSD2Target", y="LRMSD2Target", data=minb_alt_data, fit_reg=F
 plt.subplots_adjust(top=0.95)
 g.axes[0,0].set_ylim(0,5)
 g.axes[0,0].set_xlim(0,3)
+g.axes[0,0].set_yticks(np.arange(0,5.5,0.5))
 g.fig.suptitle('4YOD as MOTIF SOURCE: alternate binding minimization')
 sns.plt.show()
 ```
