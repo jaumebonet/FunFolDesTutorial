@@ -14,7 +14,7 @@
 
   <RESIDUE_SELECTORS>
     # Standard FFL ResidueSelectors.
-    <xi:include href="xml_pieces/selectors.xml" />
+    <xi:include href="../../../xml_pieces/selectors.xml" />
 
     # Template: 3lhp.pdb.gz: Engineered protein.
     <Chain name="templateChain"  chains="S" />
@@ -63,7 +63,7 @@
 
   <MOVE_MAP_FACTORIES>
     # Standard FFL MoveMap
-    <xi:include href="xml_pieces/movemap.xml" />
+    <xi:include href="../../../xml_pieces/movemap.xml" />
     <MoveMapFactory name="BINDER_MOVEMAP" bb="false" chi="false" nu="false" branches="false" jumps="false" >
       <Backbone enable="true" residue_selector="CONTEXT" />
       <Chi      enable="true" residue_selector="CONTEXT" />
@@ -72,7 +72,7 @@
 
   <TASKOPERATIONS>
     # Standard FFL TaskOperators
-    <xi:include href="xml_pieces/taskoperators.xml" />
+    <xi:include href="../../../xml_pieces/taskoperators.xml" />
   </TASKOPERATIONS>
 
   <FILTERS> # (confidence=0 -> to score not to filter)
@@ -88,11 +88,11 @@
       reference_name="target_pose" reference_selector="targetChain" query_selector="designChain" confidence="0" />
     # Check RMSD against the target PDB (4OYD.pdb) aligned through the inserted region only for alhpa helices
     # Needs to be preceded by an alignment through the region of interest
-    <RmsdFromResidueSelectorFilter name="LHRMSD2Target"  superimpose="false"
+    <RmsdFromResidueSelectorFilter name="LRMSDH2Target"  superimpose="false"
       reference_name="target_pose" reference_selector="target_alphas" query_selector="target_alphas" confidence="0" />
     # Check RMSD against the target PDB (4OYD.pdb) aligned through the inserted region only for alhpa helices regions
     # in contact with the binding motif. Needs to be preceded by an alignment through the region of interest
-    <RmsdFromResidueSelectorFilter name="LLHRMSD2Target"  superimpose="false"
+    <RmsdFromResidueSelectorFilter name="LRMSDLH2Target"  superimpose="false"
       reference_name="target_pose" reference_selector="target_local_alphas" query_selector="target_local_alphas" confidence="0" />
     # Make sure to get an evaluation of the design alone
     <ScorePoseSegmentFromResidueSelectorFilter name="design_score" confidence="0" residue_selector="designChain" scorefxn="fullatom" />
@@ -105,8 +105,8 @@
     # 4oyd.pdb.gz is the PDB that constains the design that we aim to mimic.
     #             Here it is loaded as the target_pose
     # ** SavePoseMover used like this does not need to be called during PROTOCOL to work.
-    <SavePoseMover name="load_template" reference_name="template_pose" pdb_file="pdbs/3lhp.pdb.gz" />
-    <SavePoseMover name="load_target"   reference_name="target_pose"   pdb_file="pdbs/4oyd.pdb.gz" />
+    <SavePoseMover name="load_template" reference_name="template_pose" pdb_file="../../../pdbs/3lhp.pdb.gz" />
+    <SavePoseMover name="load_target"   reference_name="target_pose"   pdb_file="../../../pdbs/4oyd.pdb.gz" />
 
     # Use distance atompairconstraints to guide the FastDesign
     <AddConstraints name="addCST" >
@@ -114,7 +114,7 @@
         use_harmonic="true" unweighted="true" min_seq_sep="6" max_distance="40" residue_selector="template"
       />
     </AddConstraints>
-
+    <ClearConstraintsMover name="cleanCST" />
 
     # The NubInitio labeling is mimicked here.
     <LabelPoseFromResidueSelectorMover name="label1" property="TEMPLATE" residue_selector="template" />
@@ -131,7 +131,8 @@
     </ParsedProtocol>
 
     # This is good to have to see a schema of what residues are going to be affected in which way
-    <DisplayPoseLabelsMover name="showDesign" task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP"/>
+    <DisplayPoseLabelsMover name="showDesign" task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP"
+        movemap_factory="FFLSTANDARD_MOVEMAP" />
 
     # For an helix bundle, this should be usefull
     <AddHelixSequenceConstraints name="addHComp" />
@@ -143,7 +144,7 @@
                repeats="1" delete_virtual_residues_after_FastRelax="true"
                movemap_factory="FFLSTANDARD_MOVEMAP" >
     </FastDesign>
-    <MinMover name="Min" scorefxn="fullatom" tolerance="0.005">
+    <MinMover name="Min" scorefxn="fullatom" chi="true" bb="true" tolerance="0.005">
       <MoveMap name="binder_map" />
     </MinMover>
     <ParsedProtocol name="DesignMinimize" >
@@ -168,13 +169,14 @@
     <Add mover="addCST" />
     <Add mover="addHComp" />
     <Add mover="DesignMinimizeLoop" />
+    <Add mover="cleanCST" />
     # Evaluate
     <Add filter="GRMSD2Template" />
     <Add filter="GRMSD2Target" />
     <Add mover="align" />
     <Add filter="LRMSD2Target" />
-    <Add filter="LHRMSD2Target" />
-    <Add filter="LLHRMSD2Target" />
+    <Add filter="LRMSDH2Target" />
+    <Add filter="LRMSDLH2Target" />
     <Add filter="design_score" />
   </PROTOCOLS>
 
