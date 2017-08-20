@@ -24,35 +24,6 @@ We will run the protocol with and without a binder. Using full CA constraints fr
 
 
 ```python
-from IPython.core.display import HTML
-HTML("""
-<style>
-.output_png {
-    display: table-cell;
-    text-align: center;
-    vertical-align: middle;
-}
-</style>
-""")
-```
-
-
-
-
-
-<style>
-.output_png {
-    display: table-cell;
-    text-align: center;
-    vertical-align: middle;
-}
-</style>
-
-
-
-
-
-```python
 %matplotlib inline
 import matplotlib
 import matplotlib.pyplot as plt
@@ -61,7 +32,7 @@ import pandas as pd
 import seaborn as sns
 import copy
 
-sns.set(font_scale=1.5)
+sns.set(font_scale=1.5);
 ```
 
 
@@ -113,7 +84,7 @@ sns.plt.show()
 ```
 
 
-![png](README_files/README_6_0.png)
+![png](README_files/README_5_0.png)
 
 
 
@@ -154,7 +125,7 @@ sns.plt.show()
 ```
 
 
-![png](README_files/README_9_0.png)
+![png](README_files/README_8_0.png)
 
 
 
@@ -165,6 +136,21 @@ plt.subplots_adjust(top=0.85)
 g.axes[0,0].set_ylim(0,4)
 g.axes[0,0].set_xlim(-65,10)
 g.fig.suptitle('ddG (minimized) vs. LocalRMSD')
+sns.plt.show()
+```
+
+
+![png](README_files/README_9_0.png)
+
+
+
+```python
+g = sns.lmplot(x="min_ddg", y="score", col="experiment", hue="experiment", data=fulldata,
+               fit_reg=False, size=10)
+plt.subplots_adjust(top=0.85)
+#g.axes[0,0].set_ylim(0,4)
+g.axes[0,0].set_xlim(-65,10)
+g.fig.suptitle('ddG (minimized) vs. score')
 sns.plt.show()
 ```
 
