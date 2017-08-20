@@ -1,0 +1,26 @@
+<ROSETTASCRIPTS>
+	<SCOREFXNS>
+    <ScoreFunction name="fullatom" weights="talaris2014" />
+	</SCOREFXNS>
+  <FILTERS>
+    <FileExist name="dumped" filename="binder.pdb" />
+    <Ddg name="post_ddg" scorefxn="fullatom" repack="false" repack_bound="false" confidence="0" />
+  </FILTERS>
+	<MOVERS>
+    <AddChain  name="append" file_name="binder.pdb" scorefxn="fullatom" />
+    <AtomTree name="fix_tree" fold_tree_file="binder.tree"/>
+    # Evaluate ddG before and after minimize
+    <ddG name="ddg" scorefxn="fullatom" />
+
+    # Minimize
+    <MinMover name="minimize" scorefxn="fullatom" chi="true" bb="true" jump="0" tolerance="0.001" />
+	</MOVERS>
+
+	<PROTOCOLS>
+    <Add mover_name="append" />
+    <Add mover_name="fix_tree" />
+    <Add mover_name="ddg" />
+    <Add mover_name="minimize" />
+    <Add filter_name="post_ddg" />
+	</PROTOCOLS>
+</ROSETTASCRIPTS>

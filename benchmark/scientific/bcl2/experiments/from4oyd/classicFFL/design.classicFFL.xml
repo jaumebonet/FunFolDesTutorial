@@ -152,7 +152,6 @@
     <Add mover="ReLabel" />
     <Add mover="showDesign" />
     # Design
-    <Add mover="transformer" />
     <Add mover="addCST" />
     <Add mover="addHComp" />
     <Add mover="DesignRelax" />
