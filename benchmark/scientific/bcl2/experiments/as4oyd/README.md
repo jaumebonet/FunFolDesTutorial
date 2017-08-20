@@ -24,6 +24,35 @@ We will run the protocol with and without a binder. Using full CA constraints fr
 
 
 ```python
+from IPython.core.display import HTML
+HTML("""
+<style>
+.output_png {
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+}
+</style>
+""")
+```
+
+
+
+
+
+<style>
+.output_png {
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+}
+</style>
+
+
+
+
+
+```python
 %matplotlib inline
 import matplotlib
 import matplotlib.pyplot as plt
@@ -74,7 +103,8 @@ data = pd.concat(dataframes)
 
 
 ```python
-g = sns.lmplot(x="GRMSD2Target", y="LRMSD2Target", col="experiment", hue="experiment", data=data, fit_reg=False)
+g = sns.lmplot(x="GRMSD2Target", y="LRMSD2Target", col="experiment", hue="experiment", data=data,
+               fit_reg=False, size=10)
 plt.subplots_adjust(top=0.85)
 g.axes[0,0].set_ylim(0,4)
 g.axes[0,0].set_xlim(0,2)
@@ -83,7 +113,7 @@ sns.plt.show()
 ```
 
 
-![png](README_files/README_5_0.png)
+![png](README_files/README_6_0.png)
 
 
 
@@ -115,7 +145,7 @@ fulldata = pd.merge(data, ddgdata, how='left', on=['cluster', 'decoy', 'experime
 
 
 ```python
-g = sns.lmplot(x="ddg", y="LRMSD2Target", col="experiment", hue="experiment", data=fulldata, fit_reg=False)
+g = sns.lmplot(x="ddg", y="LRMSD2Target", col="experiment", hue="experiment", data=fulldata, fit_reg=False, size=10)
 plt.subplots_adjust(top=0.85)
 g.axes[0,0].set_ylim(0,4)
 g.axes[0,0].set_xlim(-65,10)
@@ -124,12 +154,13 @@ sns.plt.show()
 ```
 
 
-![png](README_files/README_8_0.png)
+![png](README_files/README_9_0.png)
 
 
 
 ```python
-g = sns.lmplot(x="min_ddg", y="LRMSD2Target", col="experiment", hue="experiment", data=fulldata, fit_reg=False)
+g = sns.lmplot(x="min_ddg", y="LRMSD2Target", col="experiment", hue="experiment", data=fulldata,
+               fit_reg=False, size=10)
 plt.subplots_adjust(top=0.85)
 g.axes[0,0].set_ylim(0,4)
 g.axes[0,0].set_xlim(-65,10)
@@ -138,7 +169,7 @@ sns.plt.show()
 ```
 
 
-![png](README_files/README_9_0.png)
+![png](README_files/README_10_0.png)
 
 
 

@@ -24,5 +24,86 @@ After that, different design rules are tested:
 
 
 ```python
+%load_ext autoreload
+%autoreload 2
+```
+
+
+```python
+from IPython.core.display import HTML
+HTML("""
+<style>
+.output_png {
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+}
+</style>
+""")
+```
+
+
+
+
+
+<style>
+.output_png {
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+}
+</style>
+
+
+
+
+
+```python
+%matplotlib inline
+import matplotlib
+import matplotlib.pyplot as plt
+import rstoolbox
+import pandas as pd
+import seaborn as sns
+import copy
+
+sns.set(font_scale=1.5)
+```
+
+
+```python
+experiments = "minimizeBinderAlternate/output/design_minimizeBinderAlternate_1_minisilent"
+definition = {
+    "scores":{
+        "description": "description", "design_score": "score",
+        "GRMSD2Target": "GRMSD2Target",
+        "LRMSD2Target": "LRMSD2Target", "LRMSDH2Target": "LRMSDH2Target", "LRMSDLH2Target": "LRMSDLH2Target"
+    },
+    "naming": ["", "", "", "", "cluster", "decoy", "experiment", "", "", ""]
+}
+```
+
+
+```python
+dlist         = rstoolbox.api.read_rosetta_silent(experiments)
+minb_alt_data = rstoolbox.api.process_from_definitions(dlist, definition)
+```
+
+
+```python
+g = sns.lmplot(x="GRMSD2Target", y="LRMSD2Target", data=minb_alt_data, fit_reg=False, size=10)
+plt.subplots_adjust(top=0.95)
+g.axes[0,0].set_ylim(0,5)
+g.axes[0,0].set_xlim(0,3)
+g.fig.suptitle('4YOD as MOTIF SOURCE: alternate binding minimization')
+sns.plt.show()
+```
+
+
+![png](README_files/README_6_0.png)
+
+
+
+```python
 
 ```
