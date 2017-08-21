@@ -43,6 +43,14 @@ import copy
 sns.set(font_scale=1.5);
 ```
 
+    /usr/local/lib/python2.7/site-packages/matplotlib/__init__.py:1401: UserWarning:  This call to matplotlib.use() has no effect
+    because the backend has already been chosen;
+    matplotlib.use() must be called *before* pylab, matplotlib.pyplot,
+    or matplotlib.backends is imported for the first time.
+    
+      warnings.warn(_use_error_msg)
+
+
 # minimizeBinderAlternate (mba)
 
 
@@ -67,6 +75,21 @@ mba_data.loc[mba_data["experiment"] == "minimizeBinderAlternate", "experiment"] 
 
 
 ```python
+g = sns.lmplot(x="GRMSD2Target", y="LRMSDLH2Target", data=mba_data, fit_reg=False, size=10)
+plt.subplots_adjust(top=0.95)
+g.axes[0,0].set_ylim(0,5)
+g.axes[0,0].set_xlim(0,3)
+g.axes[0,0].set_yticks(np.arange(0,5.5,0.5))
+g.fig.suptitle('4YOD as MOTIF SOURCE: minimize binding alternate (LocalAlpha)')
+sns.plt.show()
+```
+
+
+![png](README_files/README_6_0.png)
+
+
+
+```python
 g = sns.lmplot(x="GRMSD2Target", y="LRMSD2Target", data=mba_data, fit_reg=False, size=10)
 plt.subplots_adjust(top=0.95)
 g.axes[0,0].set_ylim(0,5)
@@ -77,7 +100,7 @@ sns.plt.show()
 ```
 
 
-![png](README_files/README_6_0.png)
+![png](README_files/README_7_0.png)
 
 
 
