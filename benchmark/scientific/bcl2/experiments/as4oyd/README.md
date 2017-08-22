@@ -35,6 +35,14 @@ import copy
 sns.set(font_scale=1.5);
 ```
 
+    /usr/local/lib/python2.7/site-packages/matplotlib/__init__.py:1401: UserWarning:  This call to matplotlib.use() has no effect
+    because the backend has already been chosen;
+    matplotlib.use() must be called *before* pylab, matplotlib.pyplot,
+    or matplotlib.backends is imported for the first time.
+    
+      warnings.warn(_use_error_msg)
+
+
 
 ```python
 experiments = [
@@ -43,22 +51,12 @@ experiments = [
 ]
 
 definition = {
-    "nobinder": {
-        "scores":{
-            "description": "description", "score": "score",
-            "GRMSD2Target": "GRMSD2Target",
-            "LRMSD2Target": "LRMSD2Target", "LRMSDH2Target": "LRMSDH2Target", "LRMSDLH2Target": "LRMSDLH2Target"
-        },
-        "naming": ["", "", "experiment", "", "cluster", "decoy"]
+    "scores":{
+        "description": "description", "design_score": "score",
+        "GRMSD2Target": "GRMSD2Target",
+        "LRMSD2Target": "LRMSD2Target", "LRMSDH2Target": "LRMSDH2Target", "LRMSDLH2Target": "LRMSDLH2Target"
     },
-    "binder": {
-        "scores":{
-            "description": "description", "design_score": "score",
-            "GRMSD2Target": "GRMSD2Target",
-            "LRMSD2Target": "LRMSD2Target", "LRMSDH2Target": "LRMSDH2Target", "LRMSDLH2Target": "LRMSDLH2Target"
-        },
-        "naming": ["", "", "experiment", "", "cluster", "decoy"]
-    }
+    "naming": ["", "", "experiment", "", "cluster", "decoy"]
 }
 ```
 
@@ -67,7 +65,7 @@ definition = {
 dataframes = []
 for experiment in experiments:
     dlist = rstoolbox.api.read_rosetta_silent(experiment)
-    df    = rstoolbox.api.process_from_definitions(dlist, definition[experiment.split("/")[0]])
+    df    = rstoolbox.api.process_from_definitions(dlist, definition)
     dataframes.append( df )
 data = pd.concat(dataframes)
 ```
