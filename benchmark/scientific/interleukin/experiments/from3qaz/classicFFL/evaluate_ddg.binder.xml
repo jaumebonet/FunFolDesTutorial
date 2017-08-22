@@ -1,0 +1,18 @@
+<ROSETTASCRIPTS>
+	<SCOREFXNS>
+    <ScoreFunction name="fullatom" weights="talaris2014" />
+	</SCOREFXNS>
+	<FILTERS>
+		<Ddg name="post_ddg" scorefxn="fullatom" repack="false" repack_bound="false" confidence="0" />
+	</FILTERS>
+	<MOVERS>
+    <ddG name="ddg" scorefxn="fullatom" />
+    <MinMover name="minimize" scorefxn="fullatom" chi="true" bb="true" jump="0" tolerance="0.001" />
+	</MOVERS>
+
+	<PROTOCOLS>
+    <Add mover_name="ddg" />
+    <Add mover_name="minimize" />
+    <Add filter_name="post_ddg" />
+	</PROTOCOLS>
+</ROSETTASCRIPTS>

@@ -1,0 +1,222 @@
+<ROSETTASCRIPTS>
+
+  <SCOREFXNS>
+
+    # A weight is added to small-range hbonds to favor helix.
+    # As we'll have cutpoints, we will need a score to close them.
+    <ScoreFunction name="fullatom" weights="talaris2014">
+      <Reweight scoretype="hbond_sr_bb"        weight="1.6" />
+      <Reweight scoretype="chainbreak"         weight="1.0"/>
+      <Reweight scoretype="linear_chainbreak"  weight="1.0" />
+      <Reweight scoretype="overlap_chainbreak" weight="1.0" />
+      <Reweight scoretype="aa_composition"     weight="1.0" />
+    </ScoreFunction>
+
+  </SCOREFXNS>
+
+  <RESIDUE_SELECTORS>
+    # Standard FFL ResidueSelectors.
+    <xi:include href="../../../xml_pieces/selectors.xml" />
+
+    # Template: complete_structure/3inkC_03.pdb: Interleukin2
+    # Two TEMPLATE SEGMENTS (tseg) combined into the INSERTION REGION (iregion).
+    # This structure was renumbered and fixed to complete a missing loop.
+    # Thus, the residue numbering is a bit different from that of the original PDB.
+    <Index name="tseg1"          resnums="1A-15A" />
+    <Index name="tseg2"          resnums="117A-128A" />
+    <Or    name="iregion"        selectors="tseg1,tseg2" />
+    <Chain name="templateChain"  chains="A" />
+    <Not   name="!templateChain" selector="templateChain" />
+
+    # Motif: pdbs/3qaz.pdb.gz: IL-2 mutant D10 ternary complex.
+    # Two MOTIF SEGMENTS (mseg) combined into the QUERY MOTIF (qmotif).
+    # The design chain will be the same as the pieces, and we will also
+    # assign a BINDER chains.
+    <Index name="mseg1"       resnums="6A-20A" />
+    <Index name="mseg2"       resnums="122A-133A" />
+    <Or    name="qmotif"      selectors="mseg1,mseg2" />
+    <Chain name="designChain" chains="A" />
+    <Chain name="binderChain" chains="B,C" />
+    <Or    name="all"         selectors="designChain,binderChain" />
+
+    # Target: pdbs/3qaz.pdb.gz: IL-2 mutant D10 ternary complex.
+    # We need this to compare the RMSD of our design with the conformation
+    # that the protein adquires upon binder. As we want to do both global and
+    # local alignment but also get info on different parts, we need several
+    # selectors, that we can use for both the design and target.
+    # a) an alignment region
+    #   template -> iregion
+    #   target   -> qmotif
+    # b) TARGET REGION TO COMPARE GLOBALLY MINUS GAPS (because it has 5 residues more in N-term).
+    <Index name="targetChain1" resnums="6A-31A" />
+    <Index name="targetChain2" resnums="35A-98A" />
+    <Index name="targetChain3" resnums="103A-133A" />
+    <Or name="targetChain" selectors="targetChain1,targetChain2,targetChain3" />
+    <Index name="compareDesignChain1" resnums="1A-26A" />
+    <Index name="compareDesignChain2" resnums="30A-93A" />
+    <Index name="compareDesignChain3" resnums="98A-128A" />
+    <Or name="compareDesignChain" selectors="compareDesignChain1,compareDesignChain2,compareDesignChain3" />
+    # c) individual TARGET REGIONS to check
+    <Index name="designAlpha2" resnums="47A-66A" />
+    <Index name="targetAlpha2" resnums="52A-71A" />
+    <Index name="designAlpha3" resnums="78A-91A" />
+    <Index name="targetAlpha3" resnums="83A-96A" />
+    <!-- <Index name="designA2A3"   resnums="47A-91A" />
+    <Index name="targetA2A3"   resnums="52A-96A" /> -->
+
+    # We will need to leave a bit of movement around the chainberak, see if FastDesign will solve it for us
+    <CutpointResidueSelector name="cutpoint" />
+    <PrimarySequenceNeighborhood name="cutpointaround" lower="3" upper="4" selector="cutpoint" />
+
+
+    # We will create different constraints between the residues in each helix
+    # and those between helices.
+    <SecondaryStructure name="helixSS" ss="H" use_dssp="1" />
+  </RESIDUE_SELECTORS>
+
+  <MOVE_MAP_FACTORIES>
+    # Standard FFL MoveMap
+    <xi:include href="../../../xml_pieces/movemap.xml" />
+
+    # This is more on a informative basis.
+    <MoveMapFactory name="FIXED_MOVEMAP" bb="false" chi="true" nu="false" branches="false" jumps="false">
+      <Backbone enable="true" residue_selector="cutpointaround" />
+    </MoveMapFactory>
+  </MOVE_MAP_FACTORIES>
+
+  <TASKOPERATIONS>
+    # Standard FFL TaskOperators
+    <xi:include href="../../../xml_pieces/taskoperators.xml" />
+
+    # In this scenario we are stopping after folding
+    <OperateOnResidueSubset name="NODESIGN_TASKOP" selector="all" >
+      <RestrictToRepackingRLT/>
+    </OperateOnResidueSubset>
+  </TASKOPERATIONS>
+
+  <FILTERS> # (confidence=0 -> to score not to filter)
+    # Check global RMSD against the source Template (complete_structure/3inkC_03.pdb)
+    <RmsdFromResidueSelectorFilter name="GRMSD2Template"
+      reference_name="template_pose" reference_selector="templateChain" query_selector="designChain" confidence="0" />
+    # Check global RMSD against the target PDB (pdbs/3qaz.pdb.gz)
+    <RmsdFromResidueSelectorFilter name="GRMSD2Target"
+      reference_name="target_pose" reference_selector="targetChain" query_selector="compareDesignChain" confidence="0" />
+    # Check RMSD against the target PDB (pdbs/3qaz.pdb.gz) aligned through the inserted region
+    # Needs to be preceded by an alignment through the region of interest
+    <RmsdFromResidueSelectorFilter name="LRMSD2Target" superimpose="false"
+      reference_name="target_pose" reference_selector="targetChain" query_selector="compareDesignChain" confidence="0" />
+    # Check RMSD against the target PDB (pdbs/3qaz.pdb.gz) aligned through the inserted region only each alhpa helices
+    # and both. Needs to be preceded by an alignment through the region of interest
+    <RmsdFromResidueSelectorFilter name="alpha2LRMSD2Target" superimpose="false"
+      reference_name="target_pose" reference_selector="targetAlpha2" query_selector="designAlpha2" confidence="0" />
+    <RmsdFromResidueSelectorFilter name="alpha3LRMSD2Target" superimpose="false"
+      reference_name="target_pose" reference_selector="targetAlpha3" query_selector="designAlpha3" confidence="0" />
+    <!-- <RmsdFromResidueSelectorFilter name="alphasLRMSD2Target" superimpose="false"
+      reference_name="target_pose" reference_selector="targetA2A3" query_selector="designA2A3" confidence="0" /> -->
+    # Make sure to get an evaluation of the design alone
+    <ScorePoseSegmentFromResidueSelectorFilter name="design_score" confidence="0"
+            residue_selector="designChain" scorefxn="fullatom" />
+  </FILTERS>
+
+  <MOVERS>
+    # We work with 3 PDBs here:
+    # 1se7.pdb.gz is the PDB that contains the template with the unbond version of the protein
+    # 4oyd.pdb.gz is the PDB that constains the motif, the binder and the bond version we expect to achieve
+    # ** SavePoseMover used like this does not need to be called during PROTOCOL to work.
+    <SavePoseMover name="load_template" reference_name="template_pose" pdb_file="../../../complete_structure/3inkC_03.pdb" />
+    <SavePoseMover name="load_motif"    reference_name="motif_pose"    pdb_file="../../../pdbs/3qaz.AB.pdb" />
+    <SavePoseMover name="load_target"   reference_name="target_pose"   pdb_file="../../../pdbs/3qaz.AB.pdb" />
+
+    # The creates the fragments (if they need to be created) or loads them from a file
+    # into the DataMap with the "frags" identifier (that needs to be specified in the NubInitio).
+    <StructFragmentMover name="FragmentPicker" prefix="3inkC"
+      vall_file="database/vall.jul19.2011.gz" output_frag_files="1"
+      small_frag_file="3inkC.200.3mers" large_frag_file="3inkC.200.9mers"
+    />
+
+    # Use distance atompairconstraints to guide the folding
+    <AddConstraints name="PreFflCst" >
+      <!-- <SegmentedAtomPairConstraintGenerator name="atompairCST1" residue_selector="helixSS" >
+        <Inner sd="1.5" ca_only="true" use_harmonic="true" unweighted="true" min_seq_sep="3"  />
+        <Outer sd="2.5" ca_only="true" use_harmonic="true" unweighted="true" max_distance="40"  />
+      </SegmentedAtomPairConstraintGenerator> -->
+      <AtomPairConstraintGenerator name="atompairCST2" sd="3.0" ca_only="true"
+        use_harmonic="true" unweighted="true" min_seq_sep="6" max_distance="40" residue_selector="templateChain"
+      />
+    </AddConstraints>
+    # And to restrict the FastDesign
+    <AddConstraints name="PreDesignCst" >
+      <AtomPairConstraintGenerator name="atompairCST2" sd="1.0" ca_only="true"
+        use_harmonic="true" unweighted="true" min_seq_sep="6" max_distance="40" residue_selector="designChain"
+      />
+    </AddConstraints>
+    # After folding, we will remove the constraints so that the design process is not guided by
+    # constraints that do not belong anymore to our design (they come from the original scaffold)
+    <ClearConstraintsMover name="cleanCST" />
+
+    # The NubInitio folding is done here.
+    <NubInitioMover name="FFL" fragments_id="3inkC" template_motif_selector="iregion" use_cst="true"
+      rmsd_threshold="8" fullatom_scorefxn="fullatom" rmsd_include_motif="true" clear_motif_cst="false" >
+      <Nub reference_name="motif_pose" residue_selector="qmotif" />
+    </NubInitioMover>
+
+    # CLOSURE INSURANCE
+    #   This is only needed when working on multi-segment poses.
+    #   It will make sure that:
+    #     a design chain is closed.
+    #     b) design FOLDTREE is simplified for final output.
+    #     c) design CUTPOINT residue types are removed.
+    #   In this case we can close BEFORE packrotamers, as backbone is not moved.
+    <NubInitioLoopClosureMover name="FFLCCD" fragments_id="3inkC" break_side_ramp="true" />
+
+    # For informative reasons
+    <LabelPoseFromResidueSelectorMover name="labelA2"   property="A2"   residue_selector="designAlpha2" />
+    <LabelPoseFromResidueSelectorMover name="labelA3"   property="A3"   residue_selector="designAlpha3" />
+    <!-- <LabelPoseFromResidueSelectorMover name="labelA2A3" property="A2A3" residue_selector="designA2A3" /> -->
+
+    # This is good to have to see a schema of what residues are going to be affected in which way
+    <DisplayPoseLabelsMover name="showDesign" movemap_factory="FIXED_MOVEMAP" task_operations="FFLMOTIF_TASKOP,NODESIGN_TASKOP" />
+
+    # For an helix bundle, this should be usefull
+    <AddHelixSequenceConstraints name="addHComp" />
+    # Edit the sequence to stabilize the protein
+    <FastDesign name="DesignRelax" scorefxn="fullatom" clear_designable_residues="true"
+               task_operations="NODESIGN_TASKOP,FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP"
+               repeats="3" delete_virtual_residues_after_FastRelax="true"
+               movemap_factory="FIXED_MOVEMAP" >
+    </FastDesign>
+
+    # Local alignment for final evaluation
+    <AlignByResidueSelectorMover name="align" reference_name="target_pose"
+      reference_selector="qmotif" query_selector="iregion" />
+
+  </MOVERS>
+
+  <PROTOCOLS>
+    # Preparing Template
+    <Add mover="FragmentPicker" />
+    # Fold
+    <Add mover="PreFflCst" />
+    <Add mover="FFL" />
+    <Add mover="cleanCST" />
+    <Add mover="labelA2" />
+    <Add mover="labelA3" />
+    <!-- <Add mover="labelA2A3" /> -->
+    <Add mover="showDesign" />
+    # Design
+    <Add mover="addHComp" />
+    <Add mover="PreDesignCst" />
+    <Add mover="DesignRelax" />
+    <Add mover="cleanCST" />
+    <Add mover="FFLCCD" />
+    # Evaluate
+    <Add filter="GRMSD2Template" />
+    <Add filter="GRMSD2Target" />
+    <Add mover="align" />
+    <Add filter="alpha2LRMSD2Target" />
+    <Add filter="alpha3LRMSD2Target" />
+    <!-- <Add filter="alphasLRMSD2Target" /> -->
+    <Add filter="design_score" />
+  </PROTOCOLS>
+
+</ROSETTASCRIPTS>

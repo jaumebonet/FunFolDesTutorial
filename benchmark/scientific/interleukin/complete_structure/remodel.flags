@@ -1,0 +1,12 @@
+-in:file:s 3inkC.pdb
+-remodel:blueprint 3inkC.blue
+-jd2:no_output
+-run:chain C
+
+-remodel::design::allow_rare_aro_chi
+-remodel::save_top 20
+
+-ex1
+-ex2
+-ex2aro
+-use_input_sc
