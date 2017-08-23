@@ -1,0 +1,164 @@
+<ROSETTASCRIPTS>
+
+  <SCOREFXNS>
+
+    # A weight is added to small-range hbonds to favor helix
+    # aa_composition is used to favor the correct type of residues
+    # in helical residues (requires AddHelixSequenceConstraints).
+    <ScoreFunction name="fullatom" weights="talaris2014">
+      <Reweight scoretype="hbond_sr_bb"    weight="1.6"/>
+      <Reweight scoretype="aa_composition" weight="1.0" />
+    </ScoreFunction>
+
+  </SCOREFXNS>
+
+  <RESIDUE_SELECTORS>
+    # Standard FFL ResidueSelectors.
+    <xi:include href="../../../xml_pieces/selectors.xml" />
+
+    # Template: 3lhp.pdb.gz: Engineered protein.
+    <Chain name="templateChain"  chains="A" />
+    <Not   name="!templateChain" selector="templateChain" />
+
+    # Design: from the silent files!
+    <Index name="query_motif1" resnums="1A-15A" />
+    <Index name="query_motif2" resnums="117A-128A" />
+    <Or    name="query_motif"  selectors="query_motif1,query_motif2" />
+    <Not   name="!query_motif" selector="query_motif" />
+    <Chain name="designChain"  chains="A" />
+    <Chain name="binder"       chains="B,C" />
+    <And   name="template"     selectors="designChain,!query_motif" />
+
+    # Target: pdbs/3qaz.pdb.gz: IL-2 mutant D10 ternary complex.
+    # We need this to compare the RMSD of our design with it, as we are
+    # expecting our design to get closer to this.
+    # We cannot use a chain selector as this crystal is 1 residue longer,
+    # so we have to take them out (from the C-term).
+    <Index name="targetChain1" resnums="6A-31A" />
+    <Index name="targetChain2" resnums="35A-98A" />
+    <Index name="targetChain3" resnums="103A-133A" />
+    <Or name="targetChain" selectors="targetChain1,targetChain2,targetChain3" />
+    <Index name="compareDesignChain1" resnums="1A-26A" />
+    <Index name="compareDesignChain2" resnums="30A-93A" />
+    <Index name="compareDesignChain3" resnums="98A-128A" />
+    <Or name="compareDesignChain" selectors="compareDesignChain1,compareDesignChain2,compareDesignChain3" />
+
+    # Alignment selector can be applied to both the final design and the target.
+    # This is required to do a non-global alignemnt RMSD.
+    # This selector means that we are aligning through the inserted motif wihtout
+    # the flexible regions assigned to it.
+    <Index name="target_alignment1" resnums="6A-20A" />
+    <Index name="target_alignment2" resnums="122A-133A" />
+    <Or name="target_alignment" selectors="target_alignment1,target_alignment2" />
+
+    # When comparing with the target structure, we can do it for all the structure
+    # or just for those residues that should be alpha helix (there is no garantee
+    # they will be so in the designs, though).
+    <Index name="designAlpha2" resnums="47A-66A" />
+    <Index name="targetAlpha2" resnums="52A-71A" />
+    <Index name="designAlpha3" resnums="78A-91A" />
+    <Index name="targetAlpha3" resnums="83A-96A" />
+
+  </RESIDUE_SELECTORS>
+
+  <MOVE_MAP_FACTORIES>
+    # Standard FFL MoveMap
+    <xi:include href="../../../xml_pieces/movemap.xml" />
+  </MOVE_MAP_FACTORIES>
+
+  <TASKOPERATIONS>
+    # Standard FFL TaskOperators
+    <xi:include href="../../../xml_pieces/taskoperators.xml" />
+  </TASKOPERATIONS>
+
+  <FILTERS> # (confidence=0 -> to score not to filter)
+    # Check global RMSD against the source Template
+    <RmsdFromResidueSelectorFilter name="GRMSD2Template"
+      reference_name="template_pose" reference_selector="templateChain" query_selector="designChain" confidence="0" />
+    # Check global RMSD against the target PDB
+    <RmsdFromResidueSelectorFilter name="GRMSD2Target"
+      reference_name="target_pose" reference_selector="targetChain" query_selector="designChain" confidence="0" />
+    # Check RMSD against the target PDB aligned through the inserted region
+    # Needs to be preceded by an alignment through the region of interest
+    <RmsdFromResidueSelectorFilter name="LRMSD2Target"  superimpose="false"
+      reference_name="target_pose" reference_selector="targetChain" query_selector="designChain" confidence="0" />
+
+    <RmsdFromResidueSelectorFilter name="LRMSD2H2Target"  superimpose="false"
+      reference_name="target_pose" reference_selector="targetAlpha2" query_selector="designAlpha2" confidence="0" />
+    # Check RMSD against the target PDB (4OYD.pdb) aligned through the inserted region only for alhpa helices regions
+    # in contact with the binding motif. Needs to be preceded by an alignment through the region of interest
+    <RmsdFromResidueSelectorFilter name="LRMSDL3H2Target"  superimpose="false"
+      reference_name="target_pose" reference_selector="targetAlpha3" query_selector="designAlpha3" confidence="0" />
+
+    # Make sure to get an evaluation of the design alone
+    <ScorePoseSegmentFromResidueSelectorFilter name="design_score" confidence="0" residue_selector="designChain" scorefxn="fullatom" />
+  </FILTERS>
+
+  <MOVERS>
+    # We work with 3 PDBs here:
+    # ** SavePoseMover used like this does not need to be called during PROTOCOL to work.
+    <SavePoseMover name="load_template" reference_name="template_pose" pdb_file="../../../complete_structure/3inkC_03.pdb" />
+    <SavePoseMover name="load_target"   reference_name="target_pose"   pdb_file="../../../pdbs/3qaz.AB.pdb" />
+
+    # Use distance atompairconstraints to guide the FastDesign
+    <AddConstraints name="addCST" >
+      <AtomPairConstraintGenerator name="atompairCST" sd="2.0" ca_only="true"
+        use_harmonic="true" unweighted="true" min_seq_sep="6" max_distance="40" residue_selector="template"
+      />
+    </AddConstraints>
+    <ClearConstraintsMover name="cleanCST" />
+
+    # The NubInitio labeling is mimicked here.
+    <LabelPoseFromResidueSelectorMover name="label1" property="TEMPLATE" residue_selector="template" />
+    <LabelPoseFromResidueSelectorMover name="label2" property="MOTIF"    residue_selector="query_motif" />
+    <LabelPoseFromResidueSelectorMover name="label5" property="HOTSPOT"  residue_selector="query_motif" />
+    <LabelPoseFromResidueSelectorMover name="label3" property="CONTEXT"  residue_selector="binder" />
+    <ParsedProtocol name="ReLabel" >
+      <Add mover_name="label1" />
+      <Add mover_name="label2" />
+      <Add mover_name="label3" />
+      <Add mover_name="label4" />
+      <Add mover_name="label5" />
+    </ParsedProtocol>
+
+    # This is good to have to see a schema of what residues are going to be affected in which way
+    <DisplayPoseLabelsMover name="showDesign" task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP"
+        movemap_factory="FFLSTANDARD_MOVEMAP" />
+
+    # For an helix bundle, this should be usefull
+    <AddHelixSequenceConstraints name="addHComp" />
+
+    # Edit the sequence to stabilize the protein
+    <FastDesign name="DesignRelax" scorefxn="fullatom" clear_designable_residues="true"
+               task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP"
+               repeats="3" delete_virtual_residues_after_FastRelax="true"
+               movemap_factory="FFLSTANDARD_MOVEMAP" >
+    </FastDesign>
+
+    # Local alignment for final evaluation
+    <AlignByResidueSelectorMover name="align" reference_name="target_pose"
+      reference_selector="target_alignment" query_selector="target_alignment" />
+
+  </MOVERS>
+
+  <PROTOCOLS>
+
+    # Mimick NubInitiLabels
+    <Add mover="ReLabel" />
+    <Add mover="showDesign" />
+    # Design
+    <Add mover="addCST" />
+    <Add mover="addHComp" />
+    <Add mover="DesignRelax" />
+    <Add mover="cleanCST" />
+    # Evaluate
+    <Add filter="GRMSD2Template" />
+    <Add filter="GRMSD2Target" />
+    <Add mover="align" />
+    <Add filter="LRMSD2Target" />
+    <Add filter="LRMSDH2Target" />
+    <Add filter="LRMSDLH2Target" />
+    <Add filter="design_score" />
+  </PROTOCOLS>
+
+</ROSETTASCRIPTS>
