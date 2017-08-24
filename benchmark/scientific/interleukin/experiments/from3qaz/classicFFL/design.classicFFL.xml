@@ -77,17 +77,17 @@
       reference_name="template_pose" reference_selector="templateChain" query_selector="designChain" confidence="0" />
     # Check global RMSD against the target PDB
     <RmsdFromResidueSelectorFilter name="GRMSD2Target"
-      reference_name="target_pose" reference_selector="targetChain" query_selector="designChain" confidence="0" />
+      reference_name="target_pose" reference_selector="targetChain" query_selector="compareDesignChain" confidence="0" />
     # Check RMSD against the target PDB aligned through the inserted region
     # Needs to be preceded by an alignment through the region of interest
     <RmsdFromResidueSelectorFilter name="LRMSD2Target"  superimpose="false"
-      reference_name="target_pose" reference_selector="targetChain" query_selector="designChain" confidence="0" />
+      reference_name="target_pose" reference_selector="targetChain" query_selector="compareDesignChain" confidence="0" />
 
     <RmsdFromResidueSelectorFilter name="LRMSD2H2Target"  superimpose="false"
       reference_name="target_pose" reference_selector="targetAlpha2" query_selector="designAlpha2" confidence="0" />
     # Check RMSD against the target PDB (4OYD.pdb) aligned through the inserted region only for alhpa helices regions
     # in contact with the binding motif. Needs to be preceded by an alignment through the region of interest
-    <RmsdFromResidueSelectorFilter name="LRMSDL3H2Target"  superimpose="false"
+    <RmsdFromResidueSelectorFilter name="LRMSD3H2Target"  superimpose="false"
       reference_name="target_pose" reference_selector="targetAlpha3" query_selector="designAlpha3" confidence="0" />
 
     # Make sure to get an evaluation of the design alone
@@ -117,10 +117,9 @@
       <Add mover_name="label1" />
       <Add mover_name="label2" />
       <Add mover_name="label3" />
-      <Add mover_name="label4" />
       <Add mover_name="label5" />
     </ParsedProtocol>
-
+    <AtomTree name="tree" fold_tree_file="%%tree%%" update_residue_variants="true" />
     # This is good to have to see a schema of what residues are going to be affected in which way
     <DisplayPoseLabelsMover name="showDesign" task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP"
         movemap_factory="FFLSTANDARD_MOVEMAP" />
@@ -131,13 +130,13 @@
     # Edit the sequence to stabilize the protein
     <FastDesign name="DesignRelax" scorefxn="fullatom" clear_designable_residues="true"
                task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP"
-               repeats="3" delete_virtual_residues_after_FastRelax="true"
+               repeats="1" delete_virtual_residues_after_FastRelax="true"
                movemap_factory="FFLSTANDARD_MOVEMAP" >
     </FastDesign>
 
     # Local alignment for final evaluation
     <AlignByResidueSelectorMover name="align" reference_name="target_pose"
-      reference_selector="target_alignment" query_selector="target_alignment" />
+      reference_selector="target_alignment" query_selector="query_motif" />
 
   </MOVERS>
 
@@ -145,6 +144,7 @@
 
     # Mimick NubInitiLabels
     <Add mover="ReLabel" />
+    <Add mover="tree" />
     <Add mover="showDesign" />
     # Design
     <Add mover="addCST" />
@@ -156,8 +156,8 @@
     <Add filter="GRMSD2Target" />
     <Add mover="align" />
     <Add filter="LRMSD2Target" />
-    <Add filter="LRMSDH2Target" />
-    <Add filter="LRMSDLH2Target" />
+    <Add filter="LRMSD2H2Target" />
+    <Add filter="LRMSD3H2Target" />
     <Add filter="design_score" />
   </PROTOCOLS>
 

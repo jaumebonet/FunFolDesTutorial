@@ -15,6 +15,7 @@ database/vall.jul19.2011.gz
 
 scenarios/run_test.log
 
+nohup.out
 scenarios/paths.json.user
 scenarios/*/*/*_000?.pdb
 benchmark/score_weights/binder/binderbench_*
