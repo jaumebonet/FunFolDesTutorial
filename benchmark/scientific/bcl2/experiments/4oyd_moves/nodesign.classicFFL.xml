@@ -1,0 +1,110 @@
+<ROSETTASCRIPTS>
+    <SCOREFXNS>
+        <ScoreFunction name="fullatom" weights="talaris2014">
+            <Reweight scoretype="hbond_sr_bb" weight="1.6"/>
+        </ScoreFunction>
+	</SCOREFXNS>
+
+	<RESIDUE_SELECTORS>
+        # Standard FFL ResidueSelectors.
+        <xi:include href="../../xml_pieces/selectors.xml" />
+
+        # Selectors to ReLabel as the Designs
+        <Index name="query_motif"  resnums="43B-64B" />
+        <Not   name="!query_motif" selector="query_motif" />
+        <Index name="TER_motif"    resnums="43B-44B,63B-64B" />
+        <Chain name="designChain"  chains="B" />
+        <Chain name="binderChain"  chains="A" />
+        <And   name="template"     selectors="designChain,!query_motif" />
+        <Or    name="allChains"    selectors="designChain,binderChain" />
+
+        # Selectors of pieces to compare
+        <Index name="target_chain"  resnums="1B-116B" />
+        <Index name="target_alphas" resnums="2B-33B,39B-75B,82B-115B" />
+        <Index name="target_local"  resnums="10B-31B,43B-64B,95B-114B" />
+	</RESIDUE_SELECTORS>
+
+    <MOVE_MAP_FACTORIES>
+        # Standard FFL MoveMap
+        <xi:include href="../../xml_pieces/movemap.xml" />
+        <MoveMapFactory name="FULL_MOVEMAP" bb="true" chi="true" nu="true" branches="false" jumps="false" />
+        <MoveMapFactory name="BINDER_MOVEMAP" bb="false" chi="false" nu="false" branches="false" jumps="false" >
+            <Backbone enable="true" residue_selector="CONTEXT" />
+            <Chi      enable="true" residue_selector="CONTEXT" />
+        </MoveMapFactory>
+    </MOVE_MAP_FACTORIES>
+
+	<TASKOPERATIONS>
+        # Standard FFL TaskOperators
+        <xi:include href="../../xml_pieces/taskoperators.xml" />
+        <OperateOnResidueSubset name="NOEDIT_TASKOP" selector="allChains" >
+            <RestrictToRepackingRLT/>
+        </OperateOnResidueSubset>
+	</TASKOPERATIONS>
+
+	<FILTERS>
+        # Check global (all) RMSD
+        <RmsdFromResidueSelectorFilter name="GlobalRMSD" reference_name="original"
+        reference_selector="target_chain" query_selector="target_chain" confidence="1" />
+
+        # Local (all) RMSD
+        <RmsdFromResidueSelectorFilter name="LocalRMSD" reference_name="original" superimpose="false"
+        reference_selector="target_chain" query_selector="target_chain" confidence="1" />
+        
+        # Local (alpha) RMSD
+        <RmsdFromResidueSelectorFilter name="LocalRMSDH" reference_name="original" superimpose="false"
+        reference_selector="target_alphas" query_selector="target_alphas" confidence="1" />
+
+        # Local (local) RMSD
+        <RmsdFromResidueSelectorFilter name="LocalRMSDL" reference_name="original" superimpose="false"
+        reference_selector="target_local" query_selector="target_local" confidence="1" />
+	</FILTERS>
+
+	<MOVERS>
+        <SavePoseMover name="saveCurrent" reference_name="original" restore_pose="false" />
+        <DeleteChainsMover name="cleanChainC" chains="C" />
+        <DeleteChainsMover name="cleanChainD" chains="D" />
+        <LabelPoseFromResidueSelectorMover name="label1" property="TEMPLATE" residue_selector="template" />
+        <LabelPoseFromResidueSelectorMover name="label2" property="MOTIF"    residue_selector="query_motif" />
+        <LabelPoseFromResidueSelectorMover name="label3" property="CONTEXT"  residue_selector="binderChain" />
+        <LabelPoseFromResidueSelectorMover name="label4" property="FLEXIBLE" residue_selector="TER_motif" />
+        <LabelPoseFromResidueSelectorMover name="label5" property="HOTSPOT"  residue_selector="query_motif" />
+        <ParsedProtocol name="reLabel" >
+            <Add mover_name="label1" />
+            <Add mover_name="label2" />
+            <Add mover_name="label3" />
+            <Add mover_name="label4" />
+            <Add mover_name="label5" />
+        </ParsedProtocol>
+
+        <MoveMapFactoryToNamedMoveMapMover name="mapMaker" movemap="binder_map" movemap_factory="BINDER_MOVEMAP" />
+        <FastDesign name="drc" scorefxn="fullatom" task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,NOEDIT_TASKOP"
+               repeats="3" delete_virtual_residues_after_FastRelax="true"
+               movemap_factory="FFLSTANDARD_MOVEMAP" >
+        </FastDesign>
+
+        # Local Alignment for RMSD
+        <AlignByResidueSelectorMover name="align" reference_name="original"
+            reference_selector="query_motif" query_selector="query_motif" />
+	</MOVERS>
+
+	<PROTOCOLS>
+        # Preparation
+        <Add mover="cleanChainD" />
+        <Add mover="cleanChainC" />
+        <Add mover="saveCurrent" />
+        <Add mover="reLabel" />
+
+        # D/R cycle
+        <Add mover="mapMaker" />
+        <Add mover="drc" />
+
+        # Global First
+        <Add filter="GlobalRMSD" />
+        # Loop align-eval
+        <Add mover="align" />
+        <Add filter="LocalRMSD" />
+        <Add filter="LocalRMSDH" />
+        <Add filter="LocalRMSDL" />
+	</PROTOCOLS>
+</ROSETTASCRIPTS>
