@@ -152,7 +152,7 @@ definition = {
     }
 }
 logic = {
-    "keep": ["description", "experiment", "GlobalRMSD"],
+    "keep": ["description", "experiment", "GlobalRMSD", "condition", "test"],
     "split": [("LocalRMSD", "target"), ("LocalRMSDH", "helices"), ("LocalRMSDL", "corehelices") ],
     "names": ["rmsd", "rmsd_to"]
 }
@@ -162,6 +162,8 @@ for exp in experiments:
     tmpDFL.append(rstoolbox.api.process_from_definitions(tmp, definition))
 moves4oydDF = []
 moves4oydDF.append(pd.concat(tmpDFL))
+moves4oydDF[0] = moves4oydDF[0].assign(condition=pd.Series(["binder"]*len(moves4oydDF[0]["description"])).values)
+moves4oydDF[0] = moves4oydDF[0].assign(test=pd.Series(["4oyd_moves"]*len(moves4oydDF[0]["description"])).values)
 moves4oydDF.append(rstoolbox.api.split_columns(moves4oydDF[0], logic))
 ```
 
@@ -172,7 +174,7 @@ g = (g.map(sns.regplot, "GlobalRMSD", "rmsd", fit_reg=False).add_legend())
 plt.subplots_adjust(top=0.9)
 g.axes[0,0].set_ylim(0,3)
 g.axes[0,0].set_xlim(0,3)
-g.fig.suptitle('Global vs. Local RMSD with the Target')
+g.fig.suptitle('Global vs. Local RMSD for 4OYD movements')
 sns.plt.show()
 ```
 
@@ -180,4 +182,52 @@ sns.plt.show()
 ![png](README_files/README_6_0.png)
 
 
-## B) 
+## B) How close can we mimic 4OYD from itself?
+
+Here we use 4OYD both as source of the _query motif and binder_ and as source of the _template_. This means that there is no need for the backbone to reajust to fit the binding site.  
+For this experiment we only apply _classicFFL_.
+
+
+```python
+conditions = ["nobinder", "binder"]
+definition = {
+    "scores":{
+        "description": "description", "GRMSD2Target": "GlobalRMSD", "LRMSD2Target": "LocalRMSD",
+        "LRMSDH2Target": "LocalRMSDH", "LRMSDLH2Target": "LocalRMSDL", "design_score": "score"
+    },
+    "naming": ["test", "", "condition", "", "", ""]
+}
+logic = {
+    "keep": ["description", "experiment", "GlobalRMSD", "condition", "test", "score" ],
+    "split": [("LocalRMSD", "target"), ("LocalRMSDH", "helices"), ("LocalRMSDL", "corehelices") ],
+    "names": ["rmsd", "rmsd_to"]
+}
+tmpDFL = []
+for cnd in conditions:
+    tmp = rstoolbox.api.read_rosetta_silent("experiments/as4oyd/{0}/as4oyd_{0}_1_minisilent".format(cnd))
+    tmpDFL.append(rstoolbox.api.process_from_definitions(tmp, definition))
+as4oydDF = []
+as4oydDF.append(pd.concat(tmpDFL))
+as4oydDF[0] = as4oydDF[0].assign(experiment=pd.Series(["classicFFL"]*len(as4oydDF[0]["description"])).values)
+as4oydDF.append(rstoolbox.api.split_columns(as4oydDF[0], logic))
+```
+
+
+```python
+g = sns.FacetGrid(as4oydDF[1], col="rmsd_to", hue="condition", size=10, aspect=0.6, legend_out=True)
+g = (g.map(sns.regplot, "GlobalRMSD", "rmsd", fit_reg=False).add_legend())
+plt.subplots_adjust(top=0.9)
+g.axes[0,0].set_ylim(0,3)
+g.axes[0,0].set_xlim(0,3)
+g.fig.suptitle('Global vs. Local RMSD for 4OYD refolded on itself')
+sns.plt.show()
+```
+
+
+![png](README_files/README_9_0.png)
+
+
+
+```python
+
+```
