@@ -2,12 +2,20 @@
 	<SCOREFXNS>
     <ScoreFunction name="fullatom" weights="talaris2014" />
 	</SCOREFXNS>
+	<RESIDUE_SELECTORS>
+		<Chain name="designChain"  chains="B" />
+		<Chain name="insertChain"  chains="A" />
+	</RESIDUE_SELECTORS>
   <FILTERS>
     <FileExist name="dumped" filename="binder.pdb" />
     <Ddg name="post_ddg" scorefxn="fullatom" repack="false" repack_bound="false" confidence="0" />
+		<RmsdFromResidueSelectorFilter name="rmsd_drift" reference_name="ref_pose"
+			reference_selector="designChain" query_selector="insertChain" confidence="0" />
+		<PoseInfo name="info"/>
   </FILTERS>
 	<MOVERS>
-    <AddChain  name="append" file_name="binder.pdb" scorefxn="fullatom" />
+		<SavePoseMover name="reference" reference_name="ref_pose" restore_pose="0" />
+    <AddChain name="append" file_name="binder.pdb" scorefxn="fullatom" />
     <AtomTree name="fix_tree" fold_tree_file="binder.tree"/>
     # Evaluate ddG before and after minimize
     <ddG name="ddg" scorefxn="fullatom" />
@@ -17,10 +25,13 @@
 	</MOVERS>
 
 	<PROTOCOLS>
-    <Add mover_name="append" />
-    <Add mover_name="fix_tree" />
-    <Add mover_name="ddg" />
-    <Add mover_name="minimize" />
-    <Add filter_name="post_ddg" />
+    <Add mover="reference" />
+    <Add mover="append" />
+    <Add filter="info" />
+    <Add mover="fix_tree" />
+    <Add mover="ddg" />
+    <Add mover="minimize" />
+    <Add filter="post_ddg" />
+    <Add filter="rmsd_drift" />
 	</PROTOCOLS>
 </ROSETTASCRIPTS>

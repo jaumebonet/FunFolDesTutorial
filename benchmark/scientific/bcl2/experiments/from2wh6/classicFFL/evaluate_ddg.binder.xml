@@ -17,10 +17,10 @@
 	</MOVERS>
 
 	<PROTOCOLS>
-		<Add mover="reference" />
+    <Add mover="reference" />
     <Add mover="ddg" />
     <Add mover="minimize" />
-		<Add filter="post_ddg" />
+    <Add filter="post_ddg" />
     <Add filter="rmsd_drift" />
 	</PROTOCOLS>
 </ROSETTASCRIPTS>

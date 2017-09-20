@@ -25,13 +25,13 @@
 	</MOVERS>
 
 	<PROTOCOLS>
-		<Add mover="reference" />
-		<Add mover="append" />
+    <Add mover="reference" />
+    <Add mover="append" />
     <Add filter="info" />
     <Add mover="fix_tree" />
     <Add mover="ddg" />
     <Add mover="minimize" />
     <Add filter="post_ddg" />
-		<Add filter="rmsd_drift" />
+    <Add filter="rmsd_drift" />
 	</PROTOCOLS>
 </ROSETTASCRIPTS>

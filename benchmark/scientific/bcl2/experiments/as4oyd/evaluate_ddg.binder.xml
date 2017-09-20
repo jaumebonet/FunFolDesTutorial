@@ -2,17 +2,25 @@
 	<SCOREFXNS>
     <ScoreFunction name="fullatom" weights="talaris2014" />
 	</SCOREFXNS>
+	<RESIDUE_SELECTORS>
+		<Chain name="designChain"  chains="B" />
+	</RESIDUE_SELECTORS>
 	<FILTERS>
 		<Ddg name="post_ddg" scorefxn="fullatom" repack="false" repack_bound="false" confidence="0" />
+		<RmsdFromResidueSelectorFilter name="rmsd_drift" reference_name="ref_pose"
+			reference_selector="designChain" query_selector="designChain" confidence="0" />
 	</FILTERS>
 	<MOVERS>
+		<SavePoseMover name="reference" reference_name="ref_pose" restore_pose="0" />
     <ddG name="ddg" scorefxn="fullatom" />
     <MinMover name="minimize" scorefxn="fullatom" chi="true" bb="true" jump="0" tolerance="0.001" />
 	</MOVERS>
 
 	<PROTOCOLS>
-    <Add mover_name="ddg" />
-    <Add mover_name="minimize" />
-    <Add filter_name="post_ddg" />
+		<Add mover="reference" />
+    <Add mover="ddg" />
+    <Add mover="minimize" />
+    <Add filter="post_ddg" />
+		<Add filter="rmsd_drift" />
 	</PROTOCOLS>
 </ROSETTASCRIPTS>
