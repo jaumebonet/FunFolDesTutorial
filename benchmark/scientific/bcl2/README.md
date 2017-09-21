@@ -7,6 +7,7 @@
 
 
 ```python
+import warnings; warnings.simplefilter('ignore')
 import matplotlib
 import matplotlib.pyplot as plt
 import rstoolbox
@@ -17,14 +18,6 @@ import copy
 
 sns.set(font_scale=1.5)
 ```
-
-    /usr/local/lib/python2.7/site-packages/matplotlib/__init__.py:1401: UserWarning:  This call to matplotlib.use() has no effect
-    because the backend has already been chosen;
-    matplotlib.use() must be called *before* pylab, matplotlib.pyplot,
-    or matplotlib.backends is imported for the first time.
-    
-      warnings.warn(_use_error_msg)
-
 
 # Scaffold Adaptability: BHRF1 Inhibitor
 
@@ -195,21 +188,37 @@ definition = {
         "description": "description", "GRMSD2Target": "GlobalRMSD", "LRMSD2Target": "LocalRMSD",
         "LRMSDH2Target": "LocalRMSDH", "LRMSDLH2Target": "LocalRMSDL", "design_score": "score"
     },
-    "naming": ["test", "", "condition", "", "", ""]
+    "naming": ["test", "", "condition", "", "cluster", "decoy"]
 }
-logic = {
+ddg_defs = {
+    "scores":{
+        "ddg": "pre_ddg", "post_ddg": "post_ddg", "rmsd_drift": "rmsd_drift"
+    },
+    "naming": ["test", "", "condition", "", "cluster", "decoy", ""]
+}
+logic1 = {
     "keep": ["description", "experiment", "GlobalRMSD", "condition", "test", "score" ],
     "split": [("LocalRMSD", "target"), ("LocalRMSDH", "helices"), ("LocalRMSDL", "corehelices") ],
     "names": ["rmsd", "rmsd_to"]
 }
+logic2 = {
+    "keep": ["description", "experiment", "condition", "test", "score", "rmsd_drift" ],
+    "split": [("post_ddg", "post-min"), ("pre_ddg", "pre-min") ],
+    "names": ["ddg", "ddg_when"]
+}
 tmpDFL = []
+ddgDFL = []
 for cnd in conditions:
     tmp = rstoolbox.api.read_rosetta_silent("experiments/as4oyd/{0}/as4oyd_{0}_1_minisilent".format(cnd))
     tmpDFL.append(rstoolbox.api.process_from_definitions(tmp, definition))
+    tmp = rstoolbox.api.read_rosetta_silent("experiments/as4oyd/{0}/ddg_evaluation.score".format(cnd))
+    ddgDFL.append(rstoolbox.api.process_from_definitions(tmp, ddg_defs))
 as4oydDF = []
 as4oydDF.append(pd.concat(tmpDFL))
+as4oydDF[0] = pd.merge(as4oydDF[0], pd.concat(ddgDFL), how='left', on=["test", "condition", "cluster", "decoy"])
 as4oydDF[0] = as4oydDF[0].assign(experiment=pd.Series(["classicFFL"]*len(as4oydDF[0]["description"])).values)
-as4oydDF.append(rstoolbox.api.split_columns(as4oydDF[0], logic))
+as4oydDF.append(rstoolbox.api.split_columns(as4oydDF[0], logic1))
+as4oydDF.append(rstoolbox.api.split_columns(as4oydDF[0], logic2))
 ```
 
 
@@ -225,6 +234,34 @@ sns.plt.show()
 
 
 ![png](README_files/README_9_0.png)
+
+
+
+```python
+g = sns.FacetGrid(as4oydDF[2], col="condition", hue="ddg_when", size=10, aspect=0.6, legend_out=True)
+g = (g.map(sns.regplot, "ddg", "score", fit_reg=False).add_legend())
+plt.subplots_adjust(top=0.9)
+g.axes[0,0].set_xlim(-70,10)
+g.fig.suptitle('Design Score vs. ddG 4OYD refolded on itself')
+sns.plt.show()
+```
+
+
+![png](README_files/README_10_0.png)
+
+
+
+```python
+f, axes = plt.subplots(1, 3, figsize=(20, 9))
+sns.boxplot(x="condition", y="score", data=as4oydDF[0], showfliers=False, ax=axes[0])
+sns.boxplot(x="condition", y="post_ddg", data=as4oydDF[0], showfliers=False, ax=axes[1])
+sns.boxplot(x="condition", y="rmsd_drift", data=as4oydDF[0], showfliers=False, ax=axes[2])
+plt.suptitle('ddG vs. score')
+sns.plt.show()
+```
+
+
+![png](README_files/README_11_0.png)
 
 
 
