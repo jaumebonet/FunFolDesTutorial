@@ -15,6 +15,7 @@ import pandas as pd
 import seaborn as sns
 import numpy as np
 import copy
+import os
 
 sns.set(font_scale=1.5)
 ```
@@ -252,16 +253,187 @@ sns.plt.show()
 
 
 ```python
-f, axes = plt.subplots(1, 3, figsize=(20, 9))
-sns.boxplot(x="condition", y="score", data=as4oydDF[0], showfliers=False, ax=axes[0])
-sns.boxplot(x="condition", y="post_ddg", data=as4oydDF[0], showfliers=False, ax=axes[1])
-sns.boxplot(x="condition", y="rmsd_drift", data=as4oydDF[0], showfliers=False, ax=axes[2])
-plt.suptitle('ddG vs. score')
-sns.plt.show()
+f, axes = plt.subplots(2, 3, figsize=(20, 15))
+sns.boxplot(x="condition", y="LocalRMSD", data=as4oydDF[0], showfliers=False, ax=axes[0,0])
+sns.boxplot(x="condition", y="LocalRMSDH", data=as4oydDF[0], showfliers=False, ax=axes[0,1])
+sns.boxplot(x="condition", y="LocalRMSDL", data=as4oydDF[0], showfliers=False, ax=axes[0,2])
+sns.boxplot(x="condition", y="score", data=as4oydDF[0], showfliers=False, ax=axes[1,0])
+sns.boxplot(x="condition", y="post_ddg", data=as4oydDF[0], showfliers=False, ax=axes[1,1])
+sns.boxplot(x="condition", y="rmsd_drift", data=as4oydDF[0], showfliers=False, ax=axes[1,2])
+plt.suptitle('4OYD refolded: RMSDs and ddG vs. score')
+
+axes[0,0].set_ylim(0,3)
+axes[0,1].set_ylim(0,3)
+axes[0,2].set_ylim(0,3)
+plt.show()
 ```
 
 
 ![png](README_files/README_11_0.png)
+
+
+## c) Use 4OYD as motif source and 3LHP as template
+
+
+```python
+definition = {
+    "scores":{
+        "description": "description", "GRMSD2Target": "GlobalRMSD", "LRMSD2Target": "LocalRMSD",
+        "LRMSDH2Target": "LocalRMSDH", "LRMSDLH2Target": "LocalRMSDL", "design_score": "score"
+    },
+    "naming": ["", "", "condition", "", "cluster", "decoy", "experiment", "", "", ""]
+}
+ddg_defs = {
+    "scores":{
+        "ddg": "pre_ddg", "post_ddg": "post_ddg", "rmsd_drift": "rmsd_drift"
+    },
+    "naming": ["", "", "condition", "", "cluster", "decoy", "experiment", "", "", "", ""]
+}
+logic1 = {
+    "keep": ["description", "experiment", "GlobalRMSD", "condition", "test", "score" ],
+    "split": [("LocalRMSD", "target"), ("LocalRMSDH", "helices"), ("LocalRMSDL", "corehelices") ],
+    "names": ["rmsd", "rmsd_to"]
+}
+logic2 = {
+    "keep": ["description", "experiment", "condition", "test", "score", "rmsd_drift" ],
+    "split": [("post_ddg", "post-min"), ("pre_ddg", "pre-min") ],
+    "names": ["ddg", "ddg_when"]
+}
+tmpDFL = []
+ddgDFL = []
+filename="experiments/from4oyd/{0}/{1}/design_{0}_1_minisilent"
+ddgname="experiments/from4oyd/{0}/{1}/ddg_evaluation.score"
+for exp in experiments:
+    for cnd in conditions:
+        if os.path.isfile(filename.format(exp, cnd)):
+            tmp = rstoolbox.api.read_rosetta_silent(filename.format(exp, cnd))
+            tmpDFL.append(rstoolbox.api.process_from_definitions(tmp, definition))
+            tmp = rstoolbox.api.read_rosetta_silent(ddgname.format(exp, cnd), allow_repeats=True)
+            ddgDFL.append(rstoolbox.api.process_from_definitions(tmp, ddg_defs))
+from4oydDF = []
+from4oydDF.append(pd.concat(tmpDFL))
+from4oydDF[0] = pd.merge(from4oydDF[0], pd.concat(ddgDFL), how='left', on=["experiment", "condition", "cluster", "decoy"])
+from4oydDF[0] = from4oydDF[0].assign(test=pd.Series(["from4oyd"]*len(from4oydDF[0]["description"])).values)
+from4oydDF.append(rstoolbox.api.split_columns(from4oydDF[0], logic1))
+from4oydDF.append(rstoolbox.api.split_columns(from4oydDF[0], logic2))
+```
+
+
+```python
+g = sns.FacetGrid(from4oydDF[1], col="rmsd_to", hue="condition", row="experiment", size=10, aspect=0.8, legend_out=True)
+g = (g.map(sns.regplot, "GlobalRMSD", "rmsd", fit_reg=False).add_legend())
+plt.subplots_adjust(top=0.9)
+g.axes[0,0].set_ylim(0,5)
+g.axes[0,0].set_xlim(0,5)
+g.fig.suptitle('Global vs. Local RMSD for all from4OYD experiments')
+sns.plt.show()
+```
+
+
+![png](README_files/README_14_0.png)
+
+
+
+```python
+f, axes = plt.subplots(4, 4, figsize=(25, 20))
+for i in range(0, 4):
+    pltdf = from4oydDF[0][from4oydDF[0]["experiment"] == experiments[i]]
+    sns.boxplot(x="condition", y="LocalRMSDL", data=pltdf, showfliers=False, ax=axes[i,0])
+    axes[i,0].set_ylim(0,3.5)
+    sns.boxplot(x="condition", y="score", data=pltdf, showfliers=False, ax=axes[i,1])
+    sns.boxplot(x="condition", y="post_ddg", data=pltdf, showfliers=False, ax=axes[i,2])
+    axes[i,2].set_ylim(-70,0)
+    sns.boxplot(x="condition", y="rmsd_drift", data=pltdf, showfliers=False, ax=axes[i,3])
+    axes[i,3].set_ylim(0,12.5)
+    
+plt.suptitle('4OYD experiments: RMSDs and ddG vs. score')
+plt.show()
+```
+
+
+![png](README_files/README_15_0.png)
+
+
+## Use 2WH6 as motif source and 3LHP as template
+
+
+```python
+definition = {
+    "scores":{
+        "description": "description", "GRMSD2Target": "GlobalRMSD", "LRMSD2Target": "LocalRMSD",
+        "LRMSDH2Target": "LocalRMSDH", "LRMSDLH2Target": "LocalRMSDL", "design_score": "score"
+    },
+    "naming": ["", "", "condition", "", "cluster", "decoy", "experiment", "", "", ""]
+}
+ddg_defs = {
+    "scores":{
+        "ddg": "pre_ddg", "post_ddg": "post_ddg", "rmsd_drift": "rmsd_drift"
+    },
+    "naming": ["", "", "condition", "", "cluster", "decoy", "experiment", "", "", "", ""]
+}
+logic1 = {
+    "keep": ["description", "experiment", "GlobalRMSD", "condition", "test", "score" ],
+    "split": [("LocalRMSD", "target"), ("LocalRMSDH", "helices"), ("LocalRMSDL", "corehelices") ],
+    "names": ["rmsd", "rmsd_to"]
+}
+logic2 = {
+    "keep": ["description", "experiment", "condition", "test", "score", "rmsd_drift" ],
+    "split": [("post_ddg", "post-min"), ("pre_ddg", "pre-min") ],
+    "names": ["ddg", "ddg_when"]
+}
+tmpDFL = []
+ddgDFL = []
+filename="experiments/from2wh6/{0}/{1}/design_{0}_1_minisilent"
+ddgname="experiments/from2wh6/{0}/{1}/ddg_evaluation.score"
+for exp in experiments:
+    for cnd in conditions:
+        if os.path.isfile(filename.format(exp, cnd)):
+            tmp = rstoolbox.api.read_rosetta_silent(filename.format(exp, cnd))
+            tmpDFL.append(rstoolbox.api.process_from_definitions(tmp, definition))
+            tmp = rstoolbox.api.read_rosetta_silent(ddgname.format(exp, cnd), allow_repeats=True)
+            ddgDFL.append(rstoolbox.api.process_from_definitions(tmp, ddg_defs))
+from2wh6DF = []
+from2wh6DF.append(pd.concat(tmpDFL))
+from2wh6DF[0] = pd.merge(from2wh6DF[0], pd.concat(ddgDFL), how='left', on=["experiment", "condition", "cluster", "decoy"])
+from2wh6DF[0] = from2wh6DF[0].assign(test=pd.Series(["from2wh6"]*len(from2wh6DF[0]["description"])).values)
+from2wh6DF.append(rstoolbox.api.split_columns(from2wh6DF[0], logic1))
+from2wh6DF.append(rstoolbox.api.split_columns(from2wh6DF[0], logic2))
+```
+
+
+```python
+g = sns.FacetGrid(from2wh6DF[1], col="rmsd_to", hue="condition", row="experiment", size=10, aspect=0.8, legend_out=True)
+g = (g.map(sns.regplot, "GlobalRMSD", "rmsd", fit_reg=False).add_legend())
+plt.subplots_adjust(top=0.9)
+g.axes[0,0].set_ylim(0,5)
+g.axes[0,0].set_xlim(0,5)
+g.fig.suptitle('Global vs. Local RMSD for all from2WH6 experiments')
+sns.plt.show()
+```
+
+
+![png](README_files/README_18_0.png)
+
+
+
+```python
+f, axes = plt.subplots(4, 4, figsize=(25, 20))
+for i in range(0, 4):
+    pltdf = from2wh6DF[0][from2wh6DF[0]["experiment"] == experiments[i]]
+    sns.boxplot(x="condition", y="LocalRMSDL", data=pltdf, showfliers=False, ax=axes[i,0])
+    axes[i,0].set_ylim(0,9)
+    sns.boxplot(x="condition", y="score", data=pltdf, showfliers=False, ax=axes[i,1])
+    sns.boxplot(x="condition", y="post_ddg", data=pltdf, showfliers=False, ax=axes[i,2])
+    axes[i,2].set_ylim(-70,0)
+    sns.boxplot(x="condition", y="rmsd_drift", data=pltdf, showfliers=False, ax=axes[i,3])
+    axes[i,3].set_ylim(0,25)
+    
+plt.suptitle('2WH6 experiments: RMSDs and ddG vs. score')
+plt.show()
+```
+
+
+![png](README_files/README_19_0.png)
 
 
 
