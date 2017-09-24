@@ -19,7 +19,7 @@ TARGET="design"
 DDG="evaluate_ddg"
 
 SUFFIX=${EXPCOMPLEMENT}_${JOBID}_${ROUND}
-OUTDIR="output"
+OUTDIR="binder"
 INSILENT=../fullcst/binder/nodesign_binder_1_${ROUND}
 mkdir -p ${OUTDIR}
 
