@@ -341,6 +341,7 @@ for i in range(0, 4):
     sns.boxplot(x="condition", y="LocalRMSDL", data=pltdf, showfliers=False, ax=axes[i,0])
     axes[i,0].set_ylim(0,3.5)
     sns.boxplot(x="condition", y="score", data=pltdf, showfliers=False, ax=axes[i,1])
+    axes[i,1].set_ylim(-350,-250)
     sns.boxplot(x="condition", y="post_ddg", data=pltdf, showfliers=False, ax=axes[i,2])
     axes[i,2].set_ylim(-70,0)
     sns.boxplot(x="condition", y="rmsd_drift", data=pltdf, showfliers=False, ax=axes[i,3])
@@ -423,8 +424,9 @@ for i in range(0, 4):
     sns.boxplot(x="condition", y="LocalRMSDL", data=pltdf, showfliers=False, ax=axes[i,0])
     axes[i,0].set_ylim(0,9)
     sns.boxplot(x="condition", y="score", data=pltdf, showfliers=False, ax=axes[i,1])
+    axes[i,1].set_ylim(-340,-200)
     sns.boxplot(x="condition", y="post_ddg", data=pltdf, showfliers=False, ax=axes[i,2])
-    axes[i,2].set_ylim(-70,0)
+    axes[i,2].set_ylim(-80,0)
     sns.boxplot(x="condition", y="rmsd_drift", data=pltdf, showfliers=False, ax=axes[i,3])
     axes[i,3].set_ylim(0,25)
     
