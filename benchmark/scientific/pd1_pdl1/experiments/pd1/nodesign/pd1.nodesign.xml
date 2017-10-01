@@ -1,0 +1,66 @@
+<ROSETTASCRIPTS>
+
+  <SCOREFXNS>
+    <ScoreFunction name="fullatom" weights="talaris2014" />
+  </SCOREFXNS>
+
+  <RESIDUE_SELECTORS>
+    <xi:include href="xml_pieces/selectors.xml" />    # Standard FFL ResidueSelectors.
+    <xi:include href="pd1.select.xml" />              # Regions of interest of the Design
+  </RESIDUE_SELECTORS>
+
+  <MOVE_MAP_FACTORIES>
+    <xi:include href="xml_pieces/movemap.xml" />      # Standard FFL MoveMap
+  </MOVE_MAP_FACTORIES>
+
+  <TASKOPERATIONS>
+    <xi:include href="xml_pieces/taskoperators.xml" /># Standard FFL TaskOperators
+  </TASKOPERATIONS>
+
+  <MOVERS>
+    <SavePoseMover name="loadMotif" reference_name="motif_pose" pdb_file="pdbs/4zqk3_0001.pdb" />
+
+    <DeleteRegionMover name="removeNonProtein" residue_selector="!PROTEIN" />
+    <DeleteRegionMover name="removeExtraChains" residue_selector="!designChain" />
+
+    # The creates the fragments (if they need to be created) or loads them from a file
+    # into the DataMap with the "frags" identifier (that needs to be specified in the NubInitio).
+    <StructFragmentMover name="FragmentPicker" prefix="frags"
+      vall_file="database/vall.jul19.2011.gz" output_frag_files="1"
+      small_frag_file="frags.200.3mers" large_frag_file="frags.200.9mers"
+    />
+
+    # Use distance atompairconstraints to guide the folding
+    <AddConstraints name="addCST" >
+      <AtomPairConstraintGenerator name="atompairCST" sd="2.0" ca_only="true"
+        use_harmonic="true" unweighted="true" min_seq_sep="6" max_distance="40" residue_selector="designChain"
+      />
+    </AddConstraints>
+    <ClearConstraintsMover name="cleanCST" />
+
+    # The NubInitio folding is done here.
+    <NubInitioMover name="FFL" fragments_id="frags" template_motif_selector="insertion" use_cst="true"
+      rmsd_threshold="5" fullatom_scorefxn="fullatom" rmsd_include_motif="true" clear_motif_cst="false" >
+      <Nub reference_name="motif_pose" residue_selector="insertion" binder_selector="binderChain" />
+    </NubInitioMover>
+    # Label the positions that have been changed in the high affinity mutant
+    <LabelPoseFromResidueSelectorMover name="labelCOLDSPOT" residue_selector="coldAffinity"
+      property="COLDSPOT" remove_property="HOTSPOT" />
+
+    <DisplayPoseLabelsMover name="showDesign" movemap_factory="FFLSTANDARD_MOVEMAP"
+      task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP" write="true" />
+
+  </MOVERS>
+
+  <PROTOCOLS>
+    <Add mover="removeNonProtein" />
+    <Add mover="removeExtraChains" />
+    <Add mover="FragmentPicker" />
+    # Fold
+    <Add mover="addCST" />
+    <Add mover="FFL" />
+    <Add mover="labelCOLDSPOT" />
+    <Add mover="cleanCST" />
+    <Add mover="showDesign" />
+  </PROTOCOLS>
+</ROSETTASCRIPTS>
