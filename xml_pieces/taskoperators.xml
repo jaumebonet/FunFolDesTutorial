@@ -1,7 +1,7 @@
 <OperateOnResidueSubset name="FFLMOTIF_TASKOP" selector="HOTSPOT_OR_CONTEXT_AND_!FLEXIBLE" >
   <PreventRepackingRLT/>
 </OperateOnResidueSubset>
-<OperateOnResidueSubset name="FFLFLEX_TASKOP" selector="FLEXIBLE" >
+<OperateOnResidueSubset name="FFLFLEX_TASKOP" selector="FLEXIBLE_AND_!COLDSPOT" >
   <RestrictToRepackingRLT/>
 </OperateOnResidueSubset>
 <OperateOnResidueSubset name="FFLTEMPLATE_TASKOP" selector="COLDSPOT_OR_TEMPLATE" >
