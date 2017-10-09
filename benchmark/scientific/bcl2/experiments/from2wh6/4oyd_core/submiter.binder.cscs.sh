@@ -7,9 +7,9 @@
 #SBATCH --partition=normal
 #SBATCH --constraint=mc
 #SBATCH --time 05:00:00
-#SBATCH --job-name="pd1_classicFFL"
-#SBATCH --output=/scratch/snx1600/jbonet/logs/pd1_classicFFL.%A_%a.out
-#SBATCH --error=/scratch/snx1600/jbonet/logs/pd1_classicFFL.%A_%a.err
+#SBATCH --job-name="bcl2_binder_classicFFL"
+#SBATCH --output=/scratch/snx1600/jbonet/logs/bcl2_binder_classicFFL.%A_%a.out
+#SBATCH --error=/scratch/snx1600/jbonet/logs/bcl2_binder_classicFFL.%A_%a.err
 
 export OMP_NUM_THREADS=1
 

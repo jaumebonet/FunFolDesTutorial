@@ -1,3 +1,5 @@
+-s ../../../pdbs/3lhp.pdb.gz
+
 -overwrite
 -in:ignore_unrecognized_res
 -in:ignore_waters

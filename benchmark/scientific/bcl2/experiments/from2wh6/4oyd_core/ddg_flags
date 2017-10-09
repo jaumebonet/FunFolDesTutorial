@@ -1,0 +1,8 @@
+
+-overwrite
+-in:ignore_unrecognized_res
+-in:ignore_waters
+-out:file:silent_struct_type binary
+-in:file:silent_struct_type binary
+
+-out:mute protocols.abinitio.foldconstraints protocols.aa_composition.AddHelixSequenceConstraintsMover
