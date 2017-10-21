@@ -1,0 +1,48 @@
+<ROSETTASCRIPTS>
+	<SCOREFXNS>
+    <ScoreFunction name="fullatom" weights="talaris2014" />
+    <ScoreFunction name="mpackscr" weights="score12minpack" />
+	</SCOREFXNS>
+	<RESIDUE_SELECTORS>
+    <Chain name="binderChain" chains="A" />
+    <Chain name="designChain" chains="B" />
+	</RESIDUE_SELECTORS>
+	<TASKOPERATIONS>
+    <OperateOnResidueSubset name="binderTask" selector="binderChain" >
+      <RestrictToRepackingRLT/>
+    </OperateOnResidueSubset>
+    <OperateOnResidueSubset name="designTask" selector="designChain" >
+      <DisallowIfNonnativeRLT disallow_aas="C" />
+    </OperateOnResidueSubset>
+	</TASKOPERATIONS>
+	<FILTERS>
+    <ChainCountFilter name="chainCount" max_chains="1" />
+	</FILTERS>
+	<MOVERS>
+    # Prepare
+    <MutateResidue     name="alaninize" residue_selector="designChain" new_res="ALA" />
+    <AtomTree          name="fixTree"   fold_tree_file="binder.tree"/>
+
+    <PackRotamersMover name="pack1"     scorefxn="fullatom" task_operations="binderTask,designTask" />
+    <LoopOver          name="packing"   mover_name="pack1"  iterations="3"  />
+    <MinPackMover      name="mpack1"    scorefxn="mpackscr" task_operations="binderTask,designTask" />
+    <LoopOver          name="minpack"   mover_name="mpack1" iterations="3"  />
+
+    <SwitchMover       name="switch1"   movers="packing,minpack" selected="%%protocol%%" />
+
+    <MinMover          name="minimize"  scorefxn="fullatom" chi="true" bb="false" jump="0" tolerance="0.001" />
+
+
+    # In case of the non-binder folded versions
+    <AddChain name="appendBinder" file_name="binder.pdb"   scorefxn="fullatom" />
+    <If       name="addBinder"    filter_name="chainCount" true_mover_name="appendBinder" />
+
+	</MOVERS>
+	<PROTOCOLS>
+    <Add mover="addBinder" /> # Add the binder, if needed.
+    <Add mover="fixTree"   /> # So keeping the jump in minimization makes sense
+    <Add mover="alaninize" /> # Forget previous sequence info.
+    <Add mover="switch1"   /> # Design
+    <Add mover="minimize"  /> # Final side-chain minimization.
+	</PROTOCOLS>
+</ROSETTASCRIPTS>
