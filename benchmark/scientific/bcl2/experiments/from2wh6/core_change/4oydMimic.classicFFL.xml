@@ -111,7 +111,7 @@
     # Make sure to get an evaluation of the design alone
     <ScorePoseSegmentFromResidueSelectorFilter name="design_score" confidence="0" residue_selector="designChain" scorefxn="fullatom_helix" />
 
-    <ChainCountFilter name="chaincount" max_chain="1" />
+    <ChainCountFilter name="chaincount" max_chains="1" />
 
     <BuriedUnsatHbonds name="BUNS" jump_number="0" confidence="0"
       task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP" />

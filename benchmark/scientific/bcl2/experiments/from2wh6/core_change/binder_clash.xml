@@ -8,7 +8,7 @@
 	</RESIDUE_SELECTORS>
 	<FILTERS>
 		<Ddg              name="ddg" scorefxn="fullatom" repack="false" repack_bound="false" confidence="0" />
-		<ChainCountFilter name="chaincount" max_chain="1" />
+		<ChainCountFilter name="chaincount" max_chains="1" />
   </FILTERS>
 	<MOVERS>
 		<AddChain      name="appendCh"  file_name="2wh6_Binder_realigned.pdb" scorefxn="fullatom" update_chains="false" />

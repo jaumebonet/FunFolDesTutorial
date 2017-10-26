@@ -12,7 +12,7 @@
 	</RESIDUE_SELECTORS>
 	<FILTERS>
 		<Ddg name="post_ddg" scorefxn="fullatom" repack="false" repack_bound="false" confidence="0" />
-		<ChainCountFilter name="chaincount" max_chain="1" />
+		<ChainCountFilter name="chaincount" max_chains="1" />
 		<RmsdFromResidueSelectorFilter name="binding_rmsd_drift" reference_name="ref_pose"
 			reference_selector="designChain" query_selector="designChain" confidence="0" />
 	</FILTERS>
