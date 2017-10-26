@@ -51,16 +51,39 @@
     <Index name="target_alphas"       resnums="2B-33B,39B-75B,82B-115B"  />
     <Index name="target_local_alphas" resnums="10B-31B,43B-64B,95B-114B" />
 
+    # Control optional repacking of contact residues in the CONTEXT chain
+    # Index is added in post-nubinitio count.
+    <Index name="repackable"  resnums="59A-117A" />
+    <Not   name="!repackable" selector="repackable" />
+    <And   name="bindpack"    selectors="CONTEXT,repackable" />
+    <And   name="bindnopack"  selectors="CONTEXT,!repackable" />
+    <And   name="HOTSPOT_AND_!FLEXIBLE"  selectors="HOTSPOT,!FLEXIBLE" />
+    <Or    name="allstatic"   selectors="HOTSPOT_AND_!FLEXIBLE,bindnopack" />
+
+    # Control optional minimization of the CONTEXT
+    <Or name="FLEXIBLE_OR_TEMPLATE_OR_CONTEXT" selectors="FLEXIBLE_OR_TEMPLATE,CONTEXT" />
+    <Or name="COLDSPOT_OR_FLEXIBLE_OR_TEMPLATE_OR_CONTEXT" selectors="COLDSPOT_OR_FLEXIBLE_OR_TEMPLATE,CONTEXT" />
+
   </RESIDUE_SELECTORS>
 
   <MOVE_MAP_FACTORIES>
     # Standard FFL MoveMap
     <xi:include href="xml_pieces/movemap.xml" />
+    <MoveMapFactory name="CONTEXT_MOVEMAP" bb="false" chi="false" nu="false" branches="false" jumps="false" >
+      <Backbone enable="true" residue_selector="FLEXIBLE_OR_TEMPLATE_OR_CONTEXT" />
+      <Chi      enable="true" residue_selector="COLDSPOT_OR_FLEXIBLE_OR_TEMPLATE_OR_CONTEXT" />
+    </MoveMapFactory>
   </MOVE_MAP_FACTORIES>
 
   <TASKOPERATIONS>
     # Standard FFL TaskOperators
     <xi:include href="xml_pieces/taskoperators.xml" />
+    <OperateOnResidueSubset name="STATIC_TASKOP" selector="allstatic" >
+      <PreventRepackingRLT/>
+    </OperateOnResidueSubset>
+    <OperateOnResidueSubset name="BINDER_PACK" selector="bindpack" >
+      <RestrictToRepackingRLT/>
+    </OperateOnResidueSubset>
   </TASKOPERATIONS>
 
   <MOVERS>
@@ -108,14 +131,14 @@
     <NubInitioMover name="FFL_binder_core" fragments_id="frags" template_motif_selector="insertion"
       use_cst="true" rmsd_threshold="5" fullatom_scorefxn="fullatom_helix" >
       <Nub reference_name="motif_pose" residue_selector="query_motif" binder_selector="binder" >
-        <Segment order="3" n_term_flex="2" c_term_flex="2" editable="3,4,6,7,10,11,14,17,18,21,22" />
+        <Segment order="1" n_term_flex="2" c_term_flex="2" editable="3,4,6,7,10,11,14,17,18,21,22" />
       </Nub>
     </NubInitioMover>
     # The NubInitio folding with binding and all different motif residues
     <NubInitioMover name="FFL_binder_motif" fragments_id="frags" template_motif_selector="insertion"
       use_cst="true" rmsd_threshold="5" fullatom_scorefxn="fullatom_helix" >
       <Nub reference_name="motif_pose" residue_selector="query_motif" binder_selector="binder" >
-        <Segment order="3" n_term_flex="2" c_term_flex="2" editable="1,2,3,4,5,6,7,10,11,13,14,17,18,19,21,22" />
+        <Segment order="1" n_term_flex="2" c_term_flex="2" editable="1,2,3,4,5,6,7,10,11,13,14,17,18,19,21,22" />
       </Nub>
     </NubInitioMover>
     # The NubInitio folding without binding and only core
@@ -138,19 +161,42 @@
     # This is good to have to see a schema of what residues are going to be affected in which way
     <DisplayPoseLabelsMover name="showDesign" movemap_factory="FFLSTANDARD_MOVEMAP"
       task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP" />
+    <LabelPoseFromResidueSelectorMover name="labeler" residue_selector="repackable" property="REPACKED" />
+    <DisplayPoseLabelsMover name="writeLabels" write="true" />
 
     # Design/Relax cycles
     <FastDesign name="DesignRelax_aa" scorefxn="fullatom_aa" clear_designable_residues="true"
       task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP"
-      repeats="1" delete_virtual_residues_after_FastRelax="true"
+      repeats="3" delete_virtual_residues_after_FastRelax="true"
       movemap_factory="FFLSTANDARD_MOVEMAP" >
     </FastDesign>
     <FastDesign name="DesignRelax_noaa" scorefxn="fullatom_helix" clear_designable_residues="true"
       task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP"
+      repeats="3" delete_virtual_residues_after_FastRelax="true"
+      movemap_factory="FFLSTANDARD_MOVEMAP" >
+    </FastDesign>
+    <FastDesign name="DesignRelax_aa_pack" scorefxn="fullatom_aa" clear_designable_residues="true"
+      task_operations="FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP,BINDER_PACK,STATIC_TASKOP"
       repeats="1" delete_virtual_residues_after_FastRelax="true"
       movemap_factory="FFLSTANDARD_MOVEMAP" >
     </FastDesign>
-    <SwitchMover name="DesignRelax" movers="DesignRelax_aa,DesignRelax_noaa" selected="%%desrel%%" />
+    <FastDesign name="DesignRelax_noaa_pack" scorefxn="fullatom_helix" clear_designable_residues="true"
+      task_operations="FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP,BINDER_PACK,STATIC_TASKOP"
+      repeats="1" delete_virtual_residues_after_FastRelax="true"
+      movemap_factory="FFLSTANDARD_MOVEMAP" >
+    </FastDesign>
+    <FastDesign name="DesignRelax_aa_min" scorefxn="fullatom_aa" clear_designable_residues="true"
+      task_operations="FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP,BINDER_PACK,STATIC_TASKOP"
+      repeats="1" delete_virtual_residues_after_FastRelax="true"
+      movemap_factory="CONTEXT_MOVEMAP" >
+    </FastDesign>
+    <FastDesign name="DesignRelax_noaa_min" scorefxn="fullatom_helix" clear_designable_residues="true"
+      task_operations="FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP,BINDER_PACK,STATIC_TASKOP"
+      repeats="1" delete_virtual_residues_after_FastRelax="true"
+      movemap_factory="CONTEXT_MOVEMAP" >
+    </FastDesign>
+    <SwitchMover name="DesignRelax" movers="DesignRelax_aa,DesignRelax_noaa,DesignRelax_aa_pack,DesignRelax_noaa_pack,DesignRelax_aa_min,DesignRelax_noaa_min"
+      selected="%%desrel%%" />
 
     # Local alignment for final evaluation
     <AlignByResidueSelectorMover name="align" reference_name="target_pose"
@@ -200,6 +246,7 @@
     <Add mover="clearCST"    />
     <Add mover="save_folded" />
     # Design
+    <Add mover="labeler"        />
     <Add mover="designCST"      />
     <Add mover="compositionCST" />
     <Add mover="DesignRelax"    />
@@ -216,6 +263,7 @@
     <Add filter="BUNS"           />
     <Add filter="packstat"       />
     <Add filter="cav_vol"        />
+    <Add mover="writeLabels"      />
   </PROTOCOLS>
 
 </ROSETTASCRIPTS>
