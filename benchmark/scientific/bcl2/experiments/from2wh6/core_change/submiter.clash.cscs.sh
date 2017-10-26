@@ -27,7 +27,7 @@ ROSETTAEXE=/scratch/snx3000/jbonet/bin/${ROSETTAAPP}.${ROSETTACOMP}
 TRACEDIR=/scratch/snx3000/jbonet/tracers/
 
 # Fixed number of structures: 572
-NSTRUCT="-nstruct 572"
+NSTRUCT="-nstruct 1"
 
 # Redirect Database
 ROSETTADB="-in:path:database /scratch/snx3000/"${USER}"/database"
@@ -39,9 +39,9 @@ ARGUMENTS="-parser:script_vars ffl="${FFL}" desres="${DRC}
 
 # Naming conventions
 JOBNAME="4oydMimic"
-JOBTYPE="classicFFL"
+JOBTYPE="binderclash"
 PREFIX=${JOBTYPE}_${FFL}_${DRC}_${SLURM_TASK_PID}
-SCRIPT="-parser:protocol "${JOBNAME}.${JOBTYPE}.xml
+SCRIPT="-parser:protocol "${JOBTYPE}.xml
 OUTDIR="output/"${FFL}"/"${DRC}
 
 # Trace log files
