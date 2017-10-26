@@ -6,10 +6,10 @@
 #SBATCH --cpus-per-task 1
 #SBATCH --partition=normal
 #SBATCH --constraint=mc
-#SBATCH --time 01:00:00
-#SBATCH --job-name="bcl2_clash"
-#SBATCH --output=/scratch/snx3000/jbonet/logs/bcl2_clash.%A_%a.out
-#SBATCH --error=/scratch/snx3000/jbonet/logs/bcl2_clash.%A_%a.err
+#SBATCH --time 01:30:00
+#SBATCH --job-name="bcl2_ddg"
+#SBATCH --output=/scratch/snx3000/jbonet/logs/bcl2_ddg.%A_%a.out
+#SBATCH --error=/scratch/snx3000/jbonet/logs/bcl2_ddg.%A_%a.err
 
 export OMP_NUM_THREADS=1
 
@@ -38,7 +38,7 @@ INFILE=${2}
 
 # Naming conventions
 JOBNAME="binder"
-JOBTYPE="clash"
+JOBTYPE="evaluate"
 PREFIX=${JOBTYPE}_${JOBTYPE}_${SLURM_TASK_PID}
 SCRIPT="-parser:protocol "${JOBNAME}_${JOBTYPE}.xml
 OUTDIR=${INDIR}

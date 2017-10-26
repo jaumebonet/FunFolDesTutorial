@@ -11,7 +11,7 @@
 		<ChainCountFilter name="chaincount" max_chain="1" />
   </FILTERS>
 	<MOVERS>
-		<AddChain      name="appendCh"  file_name="binder.pdb" scorefxn="fullatom" update_chains="false" />
+		<AddChain      name="appendCh"  file_name="2wh6_Binder_realigned.pdb" scorefxn="fullatom" update_chains="false" />
 		<MutateResidue name="cleanside" residue_selector="allChains" new_res="ALA" preserve_atom_coords="true" />
 		<If            name="addChain"  filter_name="chaincount" true_mover_name="appendCh" />
 	</MOVERS>

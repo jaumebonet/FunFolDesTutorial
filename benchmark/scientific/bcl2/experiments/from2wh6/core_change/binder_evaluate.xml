@@ -16,7 +16,7 @@
 		</FILTERS>
 	<MOVERS>
 		<SavePoseMover name="reference" reference_name="ref_pose" restore_pose="0" />
-		<AddChain name="appendCh" file_name="binder.pdb" scorefxn="fullatom" />
+		<AddChain name="appendCh" file_name="2wh6_Binder_realigned.pdb" scorefxn="fullatom" />
 		<If name="addChain" filter_name="chaincount" true_mover_name="appendCh" />
 		<AtomTree name="fix_tree" from_remark="WORKING_TREE"/>
 		# Evaluate ddG before and after minimize
