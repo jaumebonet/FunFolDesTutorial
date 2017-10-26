@@ -6,14 +6,16 @@
 	</SCOREFXNS>
 	<RESIDUE_SELECTORS>
 		<Chain name="designChain" chains="B" />
+		<Chain name="binderChain" chains="A" />
 		<Chain name="allChains"   chains="AB" />
+		<InterfaceByVector name="interface" cb_dist_cut="8" grp1_selector="designChain" grp2_selector="binderChain"/>
 	</RESIDUE_SELECTORS>
 	<FILTERS>
 		<Ddg name="post_ddg" scorefxn="fullatom" repack="false" repack_bound="false" confidence="0" />
 		<ChainCountFilter name="chaincount" max_chain="1" />
 		<RmsdFromResidueSelectorFilter name="binding_rmsd_drift" reference_name="ref_pose"
 			reference_selector="designChain" query_selector="designChain" confidence="0" />
-		</FILTERS>
+	</FILTERS>
 	<MOVERS>
 		<SavePoseMover name="reference" reference_name="ref_pose" restore_pose="0" />
 		<AddChain name="appendCh" file_name="2wh6_Binder_realigned.pdb" scorefxn="fullatom" />
@@ -23,6 +25,8 @@
 		<ddG name="ddg" scorefxn="fullatom" />
 		# Minimize
 		<MinMover name="minimize" scorefxn="fullatom" chi="true" bb="true" jump="0" tolerance="0.001" />
+		<LabelPoseFromResidueSelectorMover name="labeler" residue_selector="interface" property="INTERFACE" />
+    		<DisplayPoseLabelsMover name="writeLabels" write="true" />
 	</MOVERS>
 
 	<PROTOCOLS>
@@ -33,5 +37,7 @@
 		<Add mover="minimize" />
 		<Add filter="post_ddg" />
 		<Add filter="binding_rmsd_drift" />
+		<Add mover="labeler" />
+		<Add mover="writeLabels" />
 	</PROTOCOLS>
 </ROSETTASCRIPTS>

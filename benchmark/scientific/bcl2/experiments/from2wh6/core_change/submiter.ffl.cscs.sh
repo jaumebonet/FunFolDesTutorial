@@ -35,7 +35,7 @@ ROSETTADB="-in:path:database /scratch/snx3000/"${USER}"/database"
 # Arguments
 FFL=${1}
 DRC=${2}
-ARGUMENTS="-parser:script_vars ffl="${FFL}" desres="${DRC}
+ARGUMENTS="-parser:script_vars ffl="${FFL}" desrel="${DRC}
 
 # Naming conventions
 JOBNAME="4oydMimic"
