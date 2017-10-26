@@ -1,0 +1,23 @@
+<ROSETTASCRIPTS>
+	<SCOREFXNS>
+		<ScoreFunction name="fullatom" weights="talaris2014" />
+	</SCOREFXNS>
+	<RESIDUE_SELECTORS>
+		<Chain name="designChain" chains="B" />
+		<Chain name="allChains"   chains="AB" />
+	</RESIDUE_SELECTORS>
+	<FILTERS>
+		<Ddg              name="ddg" scorefxn="fullatom" repack="false" repack_bound="false" confidence="0" />
+		<ChainCountFilter name="chaincount" max_chain="1" />
+  </FILTERS>
+	<MOVERS>
+		<AddChain      name="appendCh"  file_name="binder.pdb" scorefxn="fullatom" update_chains="false" />
+		<MutateResidue name="cleanside" residue_selector="allChains" new_res="ALA" preserve_atom_coords="true" />
+		<If            name="addChain"  filter_name="chaincount" true_mover_name="appendCh" />
+	</MOVERS>
+	<PROTOCOLS>
+    <Add mover="addChain" />
+    <Add mover="cleanside" />
+    <Add filter="ddg" />
+	</PROTOCOLS>
+</ROSETTASCRIPTS>
