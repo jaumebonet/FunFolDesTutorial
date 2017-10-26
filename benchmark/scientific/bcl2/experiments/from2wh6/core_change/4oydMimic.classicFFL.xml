@@ -86,6 +86,39 @@
     </OperateOnResidueSubset>
   </TASKOPERATIONS>
 
+  <FILTERS> # (confidence=0 -> to score not to filter)
+    # Check global RMSD against the source Template
+    <RmsdFromResidueSelectorFilter name="GRMSD2Template"
+      reference_name="template_pose" reference_selector="templateChain" query_selector="designChain" confidence="0" />
+    # Check global RMSD against the target PDB (4OYD.pdb)
+    <RmsdFromResidueSelectorFilter name="GRMSD2Target"
+      reference_name="target_pose" reference_selector="targetChain" query_selector="designChain" confidence="0" />
+    # Check RMSD against the target PDB (4OYD.pdb) aligned through the inserted region
+    # Needs to be preceded by an alignment through the region of interest
+    <RmsdFromResidueSelectorFilter name="LRMSD2Target"  superimpose="false"
+      reference_name="target_pose" reference_selector="targetChain" query_selector="designChain" confidence="0" />
+    # Check RMSD against the target PDB (4OYD.pdb) aligned through the inserted region only for alhpa helices
+    # Needs to be preceded by an alignment through the region of interest
+    <RmsdFromResidueSelectorFilter name="LRMSDH2Target"  superimpose="false"
+      reference_name="target_pose" reference_selector="target_alphas" query_selector="target_alphas" confidence="0" />
+    # Check RMSD against the target PDB (4OYD.pdb) aligned through the inserted region only for alhpa helices regions
+    # in contact with the binding motif. Needs to be preceded by an alignment through the region of interest
+    <RmsdFromResidueSelectorFilter name="LRMSDLH2Target"  superimpose="false"
+      reference_name="target_pose" reference_selector="target_local_alphas" query_selector="target_local_alphas" confidence="0" />
+    # check rmsd drift
+    <RmsdFromResidueSelectorFilter name="rmsd_drift"
+      reference_name="folded_pose" reference_selector="designChain" query_selector="designChain" confidence="0" />
+    # Make sure to get an evaluation of the design alone
+    <ScorePoseSegmentFromResidueSelectorFilter name="design_score" confidence="0" residue_selector="designChain" scorefxn="fullatom_helix" />
+
+    <ChainCountFilter name="chaincount" max_chain="1" />
+
+    <BuriedUnsatHbonds name="BUNS" jump_number="0" confidence="0"
+      task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP" />
+    <PackStat name="packstat" repeats="5" chain="1" confidence="0" />
+    <CavityVolume name="cav_vol" confidence="0" />
+  </FILTERS>
+
   <MOVERS>
     # We work with 3 PDBs here:
     # 3lhp.pdb.gz is the PDB that contains the template that we will use. It will be loaded
@@ -161,8 +194,15 @@
     # This is good to have to see a schema of what residues are going to be affected in which way
     <DisplayPoseLabelsMover name="showDesign" movemap_factory="FFLSTANDARD_MOVEMAP"
       task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP" />
+
     <LabelPoseFromResidueSelectorMover name="labeler" residue_selector="repackable" property="REPACKED" />
     <DisplayPoseLabelsMover name="writeLabels" write="true" />
+    <ParsedProtocol name="doLabel" >
+      <Add mover_name="labeler" />
+      <Add mover_name="writeLabels" />
+    </ParsedProtocol>
+    <If name="labelContacts" filter_name="chaincount"
+      true_mover_name="null" false_mover_name="doLabel" />
 
     # Design/Relax cycles
     <FastDesign name="DesignRelax_aa" scorefxn="fullatom_aa" clear_designable_residues="true"
@@ -204,37 +244,6 @@
 
   </MOVERS>
 
-  <FILTERS> # (confidence=0 -> to score not to filter)
-    # Check global RMSD against the source Template
-    <RmsdFromResidueSelectorFilter name="GRMSD2Template"
-      reference_name="template_pose" reference_selector="templateChain" query_selector="designChain" confidence="0" />
-    # Check global RMSD against the target PDB (4OYD.pdb)
-    <RmsdFromResidueSelectorFilter name="GRMSD2Target"
-      reference_name="target_pose" reference_selector="targetChain" query_selector="designChain" confidence="0" />
-    # Check RMSD against the target PDB (4OYD.pdb) aligned through the inserted region
-    # Needs to be preceded by an alignment through the region of interest
-    <RmsdFromResidueSelectorFilter name="LRMSD2Target"  superimpose="false"
-      reference_name="target_pose" reference_selector="targetChain" query_selector="designChain" confidence="0" />
-    # Check RMSD against the target PDB (4OYD.pdb) aligned through the inserted region only for alhpa helices
-    # Needs to be preceded by an alignment through the region of interest
-    <RmsdFromResidueSelectorFilter name="LRMSDH2Target"  superimpose="false"
-      reference_name="target_pose" reference_selector="target_alphas" query_selector="target_alphas" confidence="0" />
-    # Check RMSD against the target PDB (4OYD.pdb) aligned through the inserted region only for alhpa helices regions
-    # in contact with the binding motif. Needs to be preceded by an alignment through the region of interest
-    <RmsdFromResidueSelectorFilter name="LRMSDLH2Target"  superimpose="false"
-      reference_name="target_pose" reference_selector="target_local_alphas" query_selector="target_local_alphas" confidence="0" />
-    # check rmsd drift
-    <RmsdFromResidueSelectorFilter name="rmsd_drift"
-      reference_name="folded_pose" reference_selector="designChain" query_selector="designChain" confidence="0" />
-    # Make sure to get an evaluation of the design alone
-    <ScorePoseSegmentFromResidueSelectorFilter name="design_score" confidence="0" residue_selector="designChain" scorefxn="fullatom_helix" />
-
-    <BuriedUnsatHbonds name="BUNS" jump_number="0" confidence="0"
-      task_operations="FFLMOTIF_TASKOP,FFLFLEX_TASKOP,FFLTEMPLATE_TASKOP" />
-    <PackStat name="packstat" repeats="5" chain="1" confidence="0" />
-    <CavityVolume name="cav_vol" confidence="0" />
-  </FILTERS>
-
   <PROTOCOLS>
     # Preparing Template
     <Add mover="removeExtraChains" />
@@ -246,7 +255,7 @@
     <Add mover="clearCST"    />
     <Add mover="save_folded" />
     # Design
-    <Add mover="labeler"        />
+    <Add mover="labelContacts"  />
     <Add mover="designCST"      />
     <Add mover="compositionCST" />
     <Add mover="DesignRelax"    />
@@ -263,7 +272,6 @@
     <Add filter="BUNS"           />
     <Add filter="packstat"       />
     <Add filter="cav_vol"        />
-    <Add mover="writeLabels"      />
   </PROTOCOLS>
 
 </ROSETTASCRIPTS>
