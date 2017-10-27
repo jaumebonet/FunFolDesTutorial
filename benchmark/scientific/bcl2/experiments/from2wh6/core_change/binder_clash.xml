@@ -18,6 +18,6 @@
 	<PROTOCOLS>
     <Add mover="addChain" />
     <Add mover="cleanside" />
-    <Add filter="bb_clash" />
+		<Add filter="bb_clash" />
 	</PROTOCOLS>
 </ROSETTASCRIPTS>

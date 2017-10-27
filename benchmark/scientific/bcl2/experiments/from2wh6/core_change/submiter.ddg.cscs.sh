@@ -48,4 +48,4 @@ TRACER="-mpi_tracer_to_file "${TRACEDIR}"/"${PREFIX}"_tracer_"${SLURM_TASK_PID}"
 
 mkdir -p ${OUTDIR}
 
-srun -n $SLURM_NTASKS --ntasks-per-node=$SLURM_NTASKS_PER_NODE -c $SLURM_CPUS_PER_TASK ${ROSETTAEXE} ${SCRIPT} -in:file:silent ${INFILE} -out:prefix ${PREFIX}_ -out:file:silent ${OUTDIR}/${PREFIX} ${TRACER} ${NSTRUCT} ${ROSETTADB}
+srun -n $SLURM_NTASKS --ntasks-per-node=$SLURM_NTASKS_PER_NODE -c $SLURM_CPUS_PER_TASK ${ROSETTAEXE} ${SCRIPT} -in:file:silent ${INFILE} -keep_input_scores false -out:prefix ${PREFIX}_ -out:file:silent ${OUTDIR}/${PREFIX} ${TRACER} ${NSTRUCT} ${ROSETTADB}

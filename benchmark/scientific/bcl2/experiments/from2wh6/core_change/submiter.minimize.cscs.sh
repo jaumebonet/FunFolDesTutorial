@@ -37,8 +37,8 @@ INDIR=${1}
 INFILE=${2}
 
 # Naming conventions
-JOBNAME="binder"
-JOBTYPE="clash"
+JOBNAME="minimize"
+JOBTYPE="evaluate"
 PREFIX=${JOBTYPE}_${JOBTYPE}_${SLURM_TASK_PID}
 SCRIPT="-parser:protocol "${JOBNAME}_${JOBTYPE}.xml
 OUTDIR=${INDIR}
