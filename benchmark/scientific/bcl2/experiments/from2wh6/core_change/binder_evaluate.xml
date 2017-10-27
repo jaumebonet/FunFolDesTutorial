@@ -7,7 +7,6 @@
 	<RESIDUE_SELECTORS>
 		<Chain name="designChain" chains="B" />
 		<Chain name="binderChain" chains="A" />
-		<Chain name="allChains"   chains="AB" />
 		<InterfaceByVector name="interface" cb_dist_cut="8" grp1_selector="designChain" grp2_selector="binderChain"/>
 	</RESIDUE_SELECTORS>
 	<FILTERS>
