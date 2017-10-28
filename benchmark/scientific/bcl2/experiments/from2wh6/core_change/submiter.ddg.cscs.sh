@@ -39,7 +39,7 @@ INFILE=${2}
 # Naming conventions
 JOBNAME="binder"
 JOBTYPE="evaluate"
-PREFIX=${JOBTYPE}_${JOBTYPE}_${SLURM_TASK_PID}
+PREFIX=${JOBNAME}_${JOBTYPE}_${SLURM_TASK_PID}
 SCRIPT="-parser:protocol "${JOBNAME}_${JOBTYPE}.xml
 OUTDIR=${INDIR}
 

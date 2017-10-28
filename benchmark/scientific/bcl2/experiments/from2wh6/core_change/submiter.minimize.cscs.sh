@@ -7,9 +7,9 @@
 #SBATCH --partition=normal
 #SBATCH --constraint=mc
 #SBATCH --time 01:00:00
-#SBATCH --job-name="bcl2_clash"
-#SBATCH --output=/scratch/snx3000/jbonet/logs/bcl2_clash.%A_%a.out
-#SBATCH --error=/scratch/snx3000/jbonet/logs/bcl2_clash.%A_%a.err
+#SBATCH --job-name="bcl2_min"
+#SBATCH --output=/scratch/snx3000/jbonet/logs/bcl2_min.%A_%a.out
+#SBATCH --error=/scratch/snx3000/jbonet/logs/bcl2_min.%A_%a.err
 
 export OMP_NUM_THREADS=1
 
@@ -39,7 +39,7 @@ INFILE=${2}
 # Naming conventions
 JOBNAME="minimize"
 JOBTYPE="evaluate"
-PREFIX=${JOBTYPE}_${JOBTYPE}_${SLURM_TASK_PID}
+PREFIX=${JOBNAME}_${JOBTYPE}_${SLURM_TASK_PID}
 SCRIPT="-parser:protocol "${JOBNAME}_${JOBTYPE}.xml
 OUTDIR=${INDIR}
 

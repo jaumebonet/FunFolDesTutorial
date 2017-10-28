@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task 1
 #SBATCH --partition=normal
 #SBATCH --constraint=mc
-#SBATCH --time 01:00:00
+#SBATCH --time 02:00:00
 #SBATCH --job-name="bcl2_clash"
 #SBATCH --output=/scratch/snx3000/jbonet/logs/bcl2_clash.%A_%a.out
 #SBATCH --error=/scratch/snx3000/jbonet/logs/bcl2_clash.%A_%a.err
@@ -38,8 +38,36 @@ INFILE=${2}
 
 # Naming conventions
 JOBNAME="binder"
+JOBTYPE="evaluate"
+PREFIX=${JOBNAME}_${JOBTYPE}_${SLURM_TASK_PID}
+SCRIPT="-parser:protocol "${JOBNAME}_${JOBTYPE}.xml
+OUTDIR=${INDIR}
+
+# Trace log files
+TRACER="-mpi_tracer_to_file "${TRACEDIR}"/"${PREFIX}"_tracer_"${SLURM_TASK_PID}".log"
+
+mkdir -p ${OUTDIR}
+
+srun -n $SLURM_NTASKS --ntasks-per-node=$SLURM_NTASKS_PER_NODE -c $SLURM_CPUS_PER_TASK ${ROSETTAEXE} ${SCRIPT} -in:file:silent ${INFILE} -keep_input_scores false -out:prefix ${PREFIX}_ -out:file:silent ${OUTDIR}/${PREFIX} ${TRACER} ${NSTRUCT} ${ROSETTADB}
+
+# Naming conventions
+JOBNAME="binder"
 JOBTYPE="clash"
-PREFIX=${JOBTYPE}_${JOBTYPE}_${SLURM_TASK_PID}
+PREFIX=${JOBNAME}_${JOBTYPE}_${SLURM_TASK_PID}
+SCRIPT="-parser:protocol "${JOBNAME}_${JOBTYPE}.xml
+OUTDIR=${INDIR}
+
+# Trace log files
+TRACER="-mpi_tracer_to_file "${TRACEDIR}"/"${PREFIX}"_tracer_"${SLURM_TASK_PID}".log"
+
+mkdir -p ${OUTDIR}
+
+srun -n $SLURM_NTASKS --ntasks-per-node=$SLURM_NTASKS_PER_NODE -c $SLURM_CPUS_PER_TASK ${ROSETTAEXE} ${SCRIPT} -in:file:silent ${INFILE} -keep_input_scores false -out:prefix ${PREFIX}_ -out:file:score_only ${OUTDIR}/${PREFIX} ${TRACER} ${NSTRUCT} ${ROSETTADB}
+
+# Naming conventions
+JOBNAME="minimize"
+JOBTYPE="evaluate"
+PREFIX=${JOBNAME}_${JOBTYPE}_${SLURM_TASK_PID}
 SCRIPT="-parser:protocol "${JOBNAME}_${JOBTYPE}.xml
 OUTDIR=${INDIR}
 
